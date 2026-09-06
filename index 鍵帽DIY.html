@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鍵帽DIY</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 15px; 
+      background: #FFFAF0; 
+      margin: 0; 
+      box-sizing: border-box;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 950px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header-area {
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      min-height: 50px;
+    }
+
+    .header-left-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-left-logo {
+      width: 80px;
+      height: auto;
+    }
+
+    .top-right-history {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn-history-icon {
+      width: 38px;
+      height: 38px;
+      background: #F9E9CD;
+      border: 1px solid #D4C3B3;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #5c4033;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 0;
+    }
+    .btn-history-icon:hover { background: #f2dec0; }
+
+    .btn-trash-icon {
+      background: #ff6347 !important;
+      border: 1px solid #e05338 !important;
+      border-radius: 50% !important;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 0;
+    }
+    .btn-trash-icon:hover { background: #f45133 !important; }
+    .btn-trash-icon:disabled {
+      background: #e0e0e0 !important;
+      border-color: #cccccc !important;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .btn-trash-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #ffffff;
+    }
+
+    h2 { margin: 0; font-size: 22px; color: #4a3b32; }
+
+    .canvas-wrapper { 
+      width: 900px; 
+      height: 758.82px; 
+      display: flex; 
+      justify-content: center; 
+      margin-bottom: 15px;
+      overflow: hidden; 
+      position: relative;
+      background: #FFFFFF; 
+      border: 2px solid #D4C3B3; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+      border-radius: 8px; 
+    }
+
+    canvas { 
+      display: block;
+      cursor: pointer; 
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .controls { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      width: 100%; 
+      max-width: 900px; 
+      margin-bottom: 12px;
+    }
+
+    .btn { 
+      padding: 12px 18px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: bold; 
+      flex: 1; 
+      min-width: 130px; 
+      text-align: center; 
+      border: 1px solid #D4C3B3;
+      text-decoration: none;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    
+    .btn-form { 
+      background: #deb887; 
+      color: #ffffff; 
+      border-color: #cca677; 
+    } 
+    .btn-form:hover { background: #cea877; }
+
+    .btn-checkout { background: #9E7B66; color: #ffffff; border-color: #8b6a55; } 
+
+    .color-picker-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFF8D7;
+      border: 1px solid #ffe58f;
+      padding: 10px 16px;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 900px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #d48800;
+      font-weight: bold;
+    }
+
+    .color-picker-bar input[type="color"] {
+      border: 1px solid #ffe58f;
+      width: 35px;
+      height: 35px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+
+    .color-presets { 
+      display: flex; 
+      gap: 6px; 
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .preset-btn {
+      padding: 5px 10px;
+      font-size: 12px;
+      border: 1px solid #ffe58f;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #fff;
+      color: #d48800;
+      white-space: nowrap;
+    }
+    .preset-btn:hover { background: #fff1b8; }
+
+    .tip-box { 
+      background: #fffbe6; 
+      border: 1px solid #ffe58f; 
+      padding: 10px 16px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      color: #d48800; 
+      width: 100%; 
+      max-width: 900px; 
+      box-sizing: border-box; 
+    }
+    .tip-box ul { margin: 5px 0 0 18px; padding: 0; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .modal-content h3 { margin-top: 0; color: #4a3b32; font-size: 20px; }
+    .modal-content p { font-size: 13px; color: #555; line-height: 1.4; margin-bottom: 12px; }
+    
+    .preview-img-container {
+      width: 100%;
+      height: 210px;
+      border: 1px solid #D4C3B3;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .preview-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .btn-modal-upload { 
+      background: #9E7B66; 
+      color: white; 
+      padding: 12px 15px; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      flex: 1; 
+      font-size: 14px;
+    }
+    .btn-modal-upload:hover { background: #8b6a55; }
+
+    .btn-modal-close { 
+      background: #dfcca6; 
+      color: #5c4033; 
+      padding: 12px 15px; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      flex: 1; 
+      font-size: 14px;
+    }
+    .btn-modal-close:hover { background: #d2bc94; }
+
+    @media (max-width: 950px) {
+      .canvas-wrapper { width: 100%; height: auto; aspect-ratio: 102 / 86; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <div class="header-area">
+      <div class="header-left-group">
+        <img src="The創 LOGO.png" alt="The創 LOGO" class="top-left-logo" onerror="this.style.display='none'">
+        <h2>鍵帽DIY</h2>
+      </div>
+      <div class="top-right-history">
+        <button class="btn-history-icon" onclick="undoAction()" title="返回上一步">↶</button>
+        <button class="btn-history-icon" onclick="redoAction()" title="重做下一步">↷</button>
+        <button class="btn-trash-icon" id="trashBtn" onclick="clearSelectedZone()" title="清除選中照片" disabled>
+          <svg viewBox="0 0 24 24">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <canvas id="diyCanvas"></canvas>
+    </div>
+
+    <div class="color-picker-bar">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="colorBarLabel">🎨 請點選上方任一鍵帽以設定底色：</span>
+      </div>
+      <div class="color-presets">
+        <input type="color" id="zoneBgColorPicker" value="#FFFFFF" onchange="changeSelectedZoneBgColor(this.value)">
+        <button class="preset-btn" onclick="setPresetColor('#FFFFFF')">純白</button>
+        <button class="preset-btn" onclick="setPresetColor('#FFFAF2')">米白</button>
+        <button class="preset-btn" onclick="setPresetColor('#222222')">酷黑</button>
+        <button class="preset-btn" onclick="setPresetColor('#E0F7FA')">淺藍</button>
+        <button class="preset-btn" onclick="setPresetColor('#FFF0F5')">柔粉</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-checkout" onclick="openPreviewModal()">🎁 保存圖片(保存後記得上傳)</button>
+      <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form">✨ 上傳圖片給店家(記得先保存)</a>
+    </div>
+
+    <div class="tip-box">
+      <b>✂️ 操作說明：</b> 
+      <ul>
+        <li>點擊任一直角鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
+        <li>製作完成記得上傳到表單呦，告知店員就會幫您製作了!</li>
+        <li>The創🌳台中市北區一中街173號。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 完成預覽視窗 -->
+  <div class="modal-overlay" id="previewModal" onclick="checkOutsideClose(event, 'previewModal')">
+    <div class="modal-content">
+      <h3>🎉 您的鍵帽排版完成！</h3>
+      <p>請確認下方預覽圖，點擊下載即可將高畫質排版圖片儲存至您的裝置！</p>
+      
+      <div class="preview-img-container">
+        <img id="modalPreviewImg" src="" alt="排版預覽圖">
+      </div>
+
+      <div class="modal-btn-row">
+        <button class="btn-modal-upload" onclick="confirmAndDownload()">確認並下載圖片</button>
+        <button class="btn-modal-close" onclick="closePreviewModal()">關閉視窗</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
+
+  <script>
+    const DESIGN_WIDTH = 1200;
+    const DESIGN_HEIGHT = 1011.76;
+
+    const canvas = document.getElementById('diyCanvas');
+    const wrapper = document.getElementById('canvasWrapper');
+    const ctx = canvas.getContext('2d');
+    const globalFileInput = document.getElementById('globalFileInput');
+    const trashBtn = document.getElementById('trashBtn');
+
+    let selectedZoneIndex = -1;
+
+    let baseZones = [];
+    (function initKeycapZones() {
+      const frameW = DESIGN_WIDTH; 
+      const frameH = DESIGN_HEIGHT;  
+      
+      const originX = 0; 
+      const originY = 0; 
+
+      const scaleX = DESIGN_WIDTH / 102;
+      const scaleY = DESIGN_HEIGHT / 86;
+
+      const ml = 10 * scaleX;     
+      const mt = 9 * scaleY;      
+      const size = 10.5 * scaleX; 
+      
+      const gapX = (102 - 10 - 26 - 52.5) / 4 * scaleX;
+      const gapY = (86 - 9 - 9 - 52.5) / 4 * scaleY;
+
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const x = originX + ml + c * (size + gapX);
+          const top = originY + mt + r * (size + gapY);
+          baseZones.push({
+            id: `直角鍵帽_${r+1}_${c+1}`,
+            x: x,
+            top: top,
+            w: size,
+            h: size,
+            type: 'keycap',
+            labelMain: `第 ${r+1} 排 ${c+1}`,
+            labelSub: '上傳',
+            img: null,
+            bgColor: '#FFFFFF',
+            imgData: null,
+            imgSrcBlob: null,
+            currentBlobUrl: null
+          });
+        }
+      }
+    })();
+
+    let undoStack = [];
+    let redoStack = [];
+    const MAX_HISTORY = 20;
+
+    function getCurrentStateSnapshot() {
+      return baseZones.map(z => ({
+        bgColor: z.bgColor,
+        imgSrcBlob: z.imgSrcBlob,
+        imgData: z.imgData ? { ...z.imgData } : null
+      }));
+    }
+
+    function saveState() {
+      undoStack.push(getCurrentStateSnapshot());
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack = []; 
+    }
+
+    function restoreState(state) {
+      state.forEach((savedZ, i) => {
+        baseZones[i].bgColor = savedZ.bgColor;
+        baseZones[i].imgSrcBlob = savedZ.imgSrcBlob;
+        baseZones[i].imgData = savedZ.imgData ? { ...savedZ.imgData } : null;
+
+        if (savedZ.imgSrcBlob) {
+          if (!baseZones[i].img || baseZones[i].currentBlobUrl !== savedZ.imgSrcBlob) {
+            const img = new Image();
+            img.onload = () => { render(); };
+            img.src = savedZ.imgSrcBlob;
+            baseZones[i].img = img;
+            baseZones[i].currentBlobUrl = savedZ.imgSrcBlob;
+          }
+        } else {
+          baseZones[i].img = null;
+          baseZones[i].currentBlobUrl = null;
+        }
+      });
+      render();
+    }
+
+    function undoAction() {
+      if (undoStack.length === 0) return;
+      redoStack.push(getCurrentStateSnapshot());
+      restoreState(undoStack.pop());
+    }
+
+    function redoAction() {
+      if (redoStack.length === 0) return;
+      undoStack.push(getCurrentStateSnapshot());
+      restoreState(redoStack.pop());
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) redoAction(); else undoAction();
+        e.preventDefault();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        redoAction();
+        e.preventDefault();
+      }
+    });
+
+    function initCanvasSize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = DESIGN_WIDTH * dpr;
+      canvas.height = DESIGN_HEIGHT * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      render();
+    }
+
+    window.addEventListener('resize', initCanvasSize);
+
+    function changeSelectedZoneBgColor(color) {
+      if (selectedZoneIndex !== -1) {
+        saveState();
+        baseZones[selectedZoneIndex].bgColor = color;
+        render();
+      }
+    }
+
+    function setPresetColor(color) {
+      if (selectedZoneIndex !== -1) {
+        document.getElementById('zoneBgColorPicker').value = color;
+        changeSelectedZoneBgColor(color);
+      }
+    }
+
+    function updateColorPickerUI() {
+      const label = document.getElementById('colorBarLabel');
+      const picker = document.getElementById('zoneBgColorPicker');
+      if (selectedZoneIndex !== -1) {
+        const z = baseZones[selectedZoneIndex];
+        label.innerHTML = `🎨 設定【${z.id}】底色：`;
+        picker.value = z.bgColor;
+        picker.disabled = false;
+
+        if (z.img) {
+          trashBtn.disabled = false;
+        } else {
+          trashBtn.disabled = true;
+        }
+      } else {
+        label.innerHTML = `🎨 請先點選上方任一鍵帽以設定底色：`;
+        picker.disabled = true;
+        trashBtn.disabled = true;
+      }
+    }
+
+    function render(isExporting = false) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      ctx.save();
+      ctx.clearRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
+
+      baseZones.forEach((z) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(z.x, z.top, z.w, z.h);
+        ctx.clip();
+
+        ctx.fillStyle = z.bgColor;
+        ctx.fill();
+
+        if (z.img && z.imgData) {
+          ctx.save();
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          const centerX = z.x + z.w/2 + (z.imgData.offsetX || 0);
+          const centerY = z.top + z.h/2 + (z.imgData.offsetY || 0);
+          
+          ctx.translate(centerX, centerY);
+          ctx.rotate((z.imgData.angle || 0) * Math.PI / 180);
+          ctx.scale(z.imgData.scale || 1, z.imgData.scale || 1);
+          
+          ctx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+          ctx.restore();
+        } else if (!isExporting) {
+          ctx.fillStyle = '#7C6A58';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.fillText('上傳', z.x + z.w/2, z.top + z.h/2);
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = '#B8A898';
+        ctx.lineWidth = isExporting ? 1 : 1.8;
+        ctx.beginPath();
+        ctx.rect(z.x, z.top, z.w, z.h);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      if (!isExporting && selectedZoneIndex !== -1) {
+        const z = baseZones[selectedZoneIndex];
+        if (z.img && z.imgData) {
+          drawTransformControls(z);
+        } else {
+          ctx.strokeStyle = '#1890ff';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.rect(z.x, z.top, z.w, z.h);
+          ctx.stroke();
+        }
+        updateColorPickerUI();
+      } else {
+        updateColorPickerUI();
+      }
+      ctx.restore();
+    }
+
+    function drawTransformControls(z) {
+      const targetImg = z.img;
+      const targetData = z.imgData;
+      if (!targetData) return;
+
+      const centerX = z.x + z.w/2 + targetData.offsetX;
+      const centerY = z.top + z.h/2 + targetData.offsetY;
+
+      const w = targetImg.width * targetData.scale;
+      const h = targetImg.height * targetData.scale;
+
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(targetData.angle * Math.PI / 180);
+
+      ctx.strokeStyle = '#1890ff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-w/2, -h/2, w, h);
+
+      ctx.beginPath();
+      ctx.moveTo(0, -h/2);
+      ctx.lineTo(0, -h/2 - 30);
+      ctx.strokeStyle = '#1890ff';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, -h/2 - 30, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#1890ff';
+      ctx.fill();
+
+      const handles = [{ x: -w/2, y: -h/2 }, { x: w/2, y: -h/2 }, { x: -w/2, y: h/2 }, { x: w/2, y: h/2 }];
+      handles.forEach(hCoord => {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#1890ff';
+        ctx.lineWidth = 2;
+        ctx.fillRect(hCoord.x - 6, hCoord.y - 6, 12, 12);
+        ctx.strokeRect(hCoord.x - 6, hCoord.y - 6, 12, 12);
+      });
+      ctx.restore();
+    }
+
+    function getTransformedHandleCoords(z) {
+      const targetImg = z.img;
+      const targetData = z.imgData;
+
+      const centerX = z.x + z.w/2 + targetData.offsetX;
+      const centerY = z.top + z.h/2 + targetData.offsetY;
+
+      const w = targetImg.width * targetData.scale;
+      const h = targetImg.height * targetData.scale;
+      const rad = targetData.angle * Math.PI / 180;
+
+      const localHandles = [{ x: -w/2, y: -h/2 }, { x: w/2, y: -h/2 }, { x: -w/2, y: h/2 }, { x: w/2, y: h/2 }];
+      const globalHandles = localHandles.map(lh => ({
+        x: centerX + lh.x * Math.cos(rad) - lh.y * Math.sin(rad),
+        y: centerY + lh.x * Math.sin(rad) + lh.y * Math.cos(rad)
+      }));
+      const rotHandle = {
+        x: centerX - (-h/2 - 30) * Math.sin(rad),
+        y: centerY + (-h/2 - 30) * Math.cos(rad)
+      };
+      return { globalHandles, rotHandle };
+    }
+
+    let activeMode = null;
+    let startX = 0, startY = 0;
+    let initialDist = 0, initialScale = 1;
+
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const rawX = (clientX - rect.left) * (DESIGN_WIDTH / rect.width);
+      const rawY = (clientY - rect.top) * (DESIGN_HEIGHT / rect.height);
+      return { x: rawX, y: rawY };
+    }
+
+    function getHitZone(x, y) {
+      for (let i = 0; i < baseZones.length; i++) {
+        const z = baseZones[i];
+        if (x >= z.x && x <= z.x + z.w && y >= z.top && y <= z.top + z.h) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    canvas.addEventListener('mousedown', handleCanvasInteraction);
+    canvas.addEventListener('touchstart', handleCanvasInteraction);
+
+    function handleCanvasInteraction(e) {
+      if (e.touches && e.touches.length > 1) return;
+
+      const { x, y } = getCanvasPos(e);
+      const hitThreshold = 25;
+
+      if (selectedZoneIndex !== -1) {
+        const z = baseZones[selectedZoneIndex];
+        if (z.img && z.imgData) {
+          const { globalHandles, rotHandle } = getTransformedHandleCoords(z);
+
+          if (Math.hypot(x - rotHandle.x, y - rotHandle.y) <= hitThreshold) {
+            saveState();
+            activeMode = 'rotate'; startX = x; startY = y; return;
+          }
+
+          for (let handle of globalHandles) {
+            if (Math.hypot(x - handle.x, y - handle.y) <= hitThreshold) {
+              saveState();
+              activeMode = 'scale'; startX = x; startY = y; 
+              initialScale = z.imgData.scale;
+              const centerX = z.x + z.w/2 + z.imgData.offsetX;
+              const centerY = z.top + z.h/2 + z.imgData.offsetY;
+              initialDist = Math.hypot(x - centerX, y - centerY);
+              return;
+            }
+          }
+        }
+      }
+
+      const hitIndex = getHitZone(x, y);
+      if (hitIndex !== -1) {
+        selectedZoneIndex = hitIndex;
+        const clickedZone = baseZones[hitIndex];
+
+        if (!clickedZone.img) {
+          globalFileInput.value = '';
+          globalFileInput.click();
+        } else {
+          saveState();
+          activeMode = 'move'; startX = x; startY = y;
+        }
+      } else {
+        selectedZoneIndex = -1;
+        activeMode = null;
+      }
+      render();
+    }
+
+    globalFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file || selectedZoneIndex === -1) return;
+
+      const blobUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = function() {
+        saveState();
+        const z = baseZones[selectedZoneIndex];
+        z.img = img;
+        z.imgSrcBlob = blobUrl;
+        z.currentBlobUrl = blobUrl;
+
+        const scaleX = z.w / img.width;
+        const scaleY = z.h / img.height;
+        const initialScaleVal = Math.max(scaleX, scaleY) * 1.1;
+
+        z.imgData = {
+          offsetX: 0,
+          offsetY: 0,
+          scale: initialScaleVal,
+          angle: 0
+        };
+        render();
+      };
+      img.src = blobUrl;
+    });
+
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('touchmove', handlePointerMove);
+
+    function handlePointerMove(e) {
+      if (!activeMode || selectedZoneIndex === -1) return;
+      const { x, y } = getCanvasPos(e);
+      const z = baseZones[selectedZoneIndex];
+      const dx = x - startX;
+      const dy = y - startY;
+
+      if (activeMode === 'move') {
+        z.imgData.offsetX += dx;
+        z.imgData.offsetY += dy;
+      } else if (activeMode === 'scale') {
+        const centerX = z.x + z.w/2 + z.imgData.offsetX;
+        const centerY = z.top + z.h/2 + z.imgData.offsetY;
+        const currentDist = Math.hypot(x - centerX, y - centerY);
+        if (initialDist > 0) {
+          z.imgData.scale = Math.max(0.1, initialScale * (currentDist / initialDist));
+        }
+      } else if (activeMode === 'rotate') {
+        const centerX = z.x + z.w/2 + z.imgData.offsetX;
+        const centerY = z.top + z.h/2 + z.imgData.offsetY;
+        const rad = Math.atan2(y - centerY, x - centerX);
+        let rawAngle = rad * (180 / Math.PI) + 90;
+
+        const snapTargets = [0, 90, 180, 270, 360, -90, -180, -270];
+        const snapThreshold = 5;
+
+        let normalizedAngle = ((rawAngle % 360) + 360) % 360;
+        
+        let snapped = false;
+        for (let target of snapTargets) {
+          let normTarget = ((target % 360) + 360) % 360;
+          let diff = Math.abs(normalizedAngle - normTarget);
+          if (diff <= snapThreshold || diff >= 360 - snapThreshold) {
+            z.imgData.angle = target;
+            snapped = true;
+            break;
+          }
+        }
+
+        if (!snapped) {
+          z.imgData.angle = rawAngle;
+        }
+      }
+
+      startX = x;
+      startY = y;
+      render();
+    }
+
+    window.addEventListener('mouseup', endPointerInteraction);
+    window.addEventListener('touchend', endPointerInteraction);
+
+    function endPointerInteraction() {
+      activeMode = null;
+    }
+
+    function clearSelectedZone() {
+      if (selectedZoneIndex !== -1) {
+        saveState();
+        const z = baseZones[selectedZoneIndex];
+        z.img = null;
+        z.imgData = null;
+        z.imgSrcBlob = null;
+        z.currentBlobUrl = null;
+        trashBtn.disabled = true;
+        render();
+      }
+    }
+
+    function openPreviewModal() {
+      selectedZoneIndex = -1;
+      render(true);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      document.getElementById('modalPreviewImg').src = dataUrl;
+      document.getElementById('previewModal').style.display = 'flex';
+      render(false);
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').style.display = 'none';
+    }
+
+    function checkOutsideClose(e, modalId) {
+      if (e.target.id === modalId) {
+        document.getElementById(modalId).style.display = 'none';
+      }
+    }
+
+    function confirmAndDownload() {
+      render(true);
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `我的客製鍵帽排版.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        render(false);
+        closePreviewModal();
+      }, 'image/jpeg', 0.92);
+    }
+
+    window.onload = function() {
+      initCanvasSize();
+    };
+  </script>
+</body>
+</html>
