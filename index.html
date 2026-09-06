@@ -117,7 +117,6 @@
       cursor: pointer; 
       width: 100% !important;
       height: 100% !important;
-      /* 移除 touch-action: none，允許雙指縮放網頁 */
     }
 
     .controls { 
@@ -687,15 +686,12 @@
     canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
 
     function handleCanvasInteraction(e) {
-      // 若是雙指觸控，不攔截，讓瀏覽器處理頁面雙指縮放
-      if (e.touches && e.touches.length > 1) {
+      // 雙指觸控時，交由瀏覽器處理整頁縮放
+      if (e.touches && e.touches.length >= 2) {
+        selectedZoneIndex = -1;
         activeMode = null;
+        render();
         return;
-      }
-
-      // 單指操作照片或點擊時，阻止預設滾動以防畫面晃動
-      if (e.cancelable) {
-        e.preventDefault();
       }
 
       const { x, y } = getCanvasPos(e);
@@ -708,7 +704,9 @@
 
           if (Math.hypot(x - rotHandle.x, y - rotHandle.y) <= hitThreshold) {
             saveState();
-            activeMode = 'rotate'; startX = x; startY = y; return;
+            activeMode = 'rotate'; startX = x; startY = y;
+            if (e.cancelable) e.preventDefault();
+            return;
           }
 
           for (let handle of globalHandles) {
@@ -720,6 +718,7 @@
               const centerX = z.x + z.w/2 + z.imgData.offsetX;
               const centerY = z.top + z.h/2 + z.imgData.offsetY;
               initialDist = Math.max(10, Math.hypot(x - centerX, y - centerY));
+              if (e.cancelable) e.preventDefault();
               return;
             }
           }
@@ -737,6 +736,7 @@
         } else {
           saveState();
           activeMode = 'move'; startX = x; startY = y;
+          if (e.cancelable) e.preventDefault();
         }
       } else {
         selectedZoneIndex = -1;
@@ -777,12 +777,11 @@
     window.addEventListener('touchmove', handlePointerMove, { passive: false });
 
     function handlePointerMove(e) {
-      if (e.touches && e.touches.length > 1) return; // 雙指縮放網頁時不處理照片
+      if (e.touches && e.touches.length >= 2) return;
       if (!activeMode || selectedZoneIndex === -1) return;
-
-      if (e.cancelable) {
-        e.preventDefault(); // 拖曳照片時鎖定畫面不亂跑
-      }
+      
+      // 操作照片時禁止畫面跟著移動
+      if (e.cancelable) e.preventDefault();
 
       const { x, y } = getCanvasPos(e);
       const z = baseZones[selectedZoneIndex];
