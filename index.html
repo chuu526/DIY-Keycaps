@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <!-- 允許使用者雙指縮放網頁 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鍵帽DIY</title>
   <style>
@@ -117,7 +118,7 @@
       cursor: pointer; 
       width: 100% !important;
       height: 100% !important;
-      touch-action: none;
+      /* 移除原本的 touch-action: none，允許瀏覽器正常處理雙指縮放與滾動 */
     }
 
     .controls { 
@@ -346,6 +347,7 @@
     </div>
   </div>
 
+  <!-- 完成預覽視窗 -->
   <div class="modal-overlay" id="previewModal" onclick="checkOutsideClose(event, 'previewModal')">
     <div class="modal-content">
       <h3>🎉 您的鍵帽排版完成！</h3>
@@ -566,13 +568,15 @@
         }
         ctx.restore();
 
-        ctx.save();
-        ctx.strokeStyle = '#B8A898';
-        ctx.lineWidth = isExporting ? 1 : 1.8;
-        ctx.beginPath();
-        ctx.rect(z.x, z.top, z.w, z.h);
-        ctx.stroke();
-        ctx.restore();
+        if (!isExporting) {
+          ctx.save();
+          ctx.strokeStyle = '#B8A898';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.rect(z.x, z.top, z.w, z.h);
+          ctx.stroke();
+          ctx.restore();
+        }
       });
 
       if (!isExporting && selectedZoneIndex !== -1) {
@@ -681,13 +685,17 @@
     }
 
     canvas.addEventListener('mousedown', handleCanvasInteraction);
-    canvas.addEventListener('touchstart', handleCanvasInteraction);
+    canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: true });
 
     function handleCanvasInteraction(e) {
-      if (e.touches && e.touches.length > 1) return;
+      // 如果是雙指觸控，則不攔截，讓瀏覽器執行預設的雙指縮放網頁功能
+      if (e.touches && e.touches.length > 1) {
+        activeMode = null;
+        return;
+      }
 
       const { x, y } = getCanvasPos(e);
-      const hitThreshold = 30; // 稍微放宽判定範圍，更好點擊
+      const hitThreshold = 30;
 
       if (selectedZoneIndex !== -1) {
         const z = baseZones[selectedZoneIndex];
@@ -705,7 +713,6 @@
               activeMode = 'scale'; 
               initialScale = z.imgData.scale;
               
-              // 修正：以圖片中心點計算初始距離，確保點下去瞬間比例不變，往外拉放大、往內拉縮小
               const centerX = z.x + z.w/2 + z.imgData.offsetX;
               const centerY = z.top + z.h/2 + z.imgData.offsetY;
               initialDist = Math.max(10, Math.hypot(x - centerX, y - centerY));
@@ -763,10 +770,15 @@
     });
 
     window.addEventListener('mousemove', handlePointerMove);
-    window.addEventListener('touchmove', handlePointerMove);
+    window.addEventListener('touchmove', handlePointerMove, { passive: true });
 
     function handlePointerMove(e) {
+      if (e.touches && e.touches.length > 1) {
+        activeMode = null;
+        return;
+      }
       if (!activeMode || selectedZoneIndex === -1) return;
+      
       const { x, y } = getCanvasPos(e);
       const z = baseZones[selectedZoneIndex];
       const dx = x - startX;
