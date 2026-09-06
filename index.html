@@ -2,7 +2,6 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <!-- 允許使用者雙指縮放網頁 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鍵帽DIY</title>
   <style>
@@ -118,7 +117,7 @@
       cursor: pointer; 
       width: 100% !important;
       height: 100% !important;
-      /* 移除原本的 touch-action: none，允許瀏覽器正常處理雙指縮放與滾動 */
+      /* 移除 touch-action: none，允許雙指縮放網頁 */
     }
 
     .controls { 
@@ -685,13 +684,18 @@
     }
 
     canvas.addEventListener('mousedown', handleCanvasInteraction);
-    canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: true });
+    canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
 
     function handleCanvasInteraction(e) {
-      // 如果是雙指觸控，則不攔截，讓瀏覽器執行預設的雙指縮放網頁功能
+      // 若是雙指觸控，不攔截，讓瀏覽器處理頁面雙指縮放
       if (e.touches && e.touches.length > 1) {
         activeMode = null;
         return;
+      }
+
+      // 單指操作照片或點擊時，阻止預設滾動以防畫面晃動
+      if (e.cancelable) {
+        e.preventDefault();
       }
 
       const { x, y } = getCanvasPos(e);
@@ -770,15 +774,16 @@
     });
 
     window.addEventListener('mousemove', handlePointerMove);
-    window.addEventListener('touchmove', handlePointerMove, { passive: true });
+    window.addEventListener('touchmove', handlePointerMove, { passive: false });
 
     function handlePointerMove(e) {
-      if (e.touches && e.touches.length > 1) {
-        activeMode = null;
-        return;
-      }
+      if (e.touches && e.touches.length > 1) return; // 雙指縮放網頁時不處理照片
       if (!activeMode || selectedZoneIndex === -1) return;
-      
+
+      if (e.cancelable) {
+        e.preventDefault(); // 拖曳照片時鎖定畫面不亂跑
+      }
+
       const { x, y } = getCanvasPos(e);
       const z = baseZones[selectedZoneIndex];
       const dx = x - startX;
