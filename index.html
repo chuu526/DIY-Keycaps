@@ -1020,10 +1020,13 @@
         tempCanvas.width = size;
         tempCanvas.height = size;
 
+        // 輸出底色維持透明/白色背景，未放照片的格子不繪製任何東西
         tempCtx.fillStyle = '#FFFFFF';
         tempCtx.fillRect(0, 0, size, size);
 
         baseZones.slice(1).forEach(z => {
+          if (!z.img) return; // 如果沒有照片，直接跳過不畫格子與背景
+
           tempCtx.save();
           const drawX = z.x - startX;
           const drawY = z.top - startY;
@@ -1051,15 +1054,7 @@
           }
           tempCtx.restore();
 
-          if (z.img) {
-            drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
-          } else {
-            tempCtx.save();
-            tempCtx.strokeStyle = '#E8DFD5';
-            tempCtx.lineWidth = 1;
-            tempCtx.strokeRect(drawX, drawY, z.w, z.h);
-            tempCtx.restore();
-          }
+          drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
         });
       }
 
@@ -1127,6 +1122,8 @@
         tempCtx.fillRect(0, 0, size, size);
 
         baseZones.slice(1).forEach(z => {
+          if (!z.img) return; // 如果沒有照片，直接跳過不畫格子與背景
+
           tempCtx.save();
           const drawX = z.x - startX;
           const drawY = z.top - startY;
@@ -1154,15 +1151,7 @@
           }
           tempCtx.restore();
 
-          if (z.img) {
-            drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
-          } else {
-            tempCtx.save();
-            tempCtx.strokeStyle = '#E8DFD5';
-            tempCtx.lineWidth = 1;
-            tempCtx.strokeRect(drawX, drawY, z.w, z.h);
-            tempCtx.restore();
-          }
+          drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
         });
       }
 
