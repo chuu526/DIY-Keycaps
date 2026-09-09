@@ -372,11 +372,11 @@
   <div class="modal-overlay" id="previewModal" onclick="checkOutsideClose(event, 'previewModal')">
     <div class="modal-content">
       <h3>🎉 您的排版完成！</h3>
-      <p>請確認下方預覽圖，您可以切換下載「左側單個照片框」或「右側 720×720 整面排版」：</p>
+      <p>請確認下方預覽圖，您可以切換下載「左側單個照片框」或「右側 2160×2160 高畫質整面排版」：</p>
       
       <div class="export-mode-tabs">
         <button class="export-tab-btn active" id="tabSingle" onclick="switchExportMode('single')">📦 左側單個照片框</button>
-        <button class="export-tab-btn" id="tabFull" onclick="switchExportMode('full')">🖼️ 右側 720×720 整面</button>
+        <button class="export-tab-btn" id="tabFull" onclick="switchExportMode('full')">🖼️ 右側 2160×2160 整面</button>
       </div>
 
       <div class="preview-img-container">
@@ -572,12 +572,12 @@
       }
     }
 
-    function drawCropMarks(targetCtx, x, y, w, h) {
+    function drawCropMarks(targetCtx, x, y, w, h, scaleRatio = 1) {
       targetCtx.save();
       targetCtx.strokeStyle = '#D4C3B3';
-      targetCtx.lineWidth = 2;
-      const len = 12;
-      const offset = 4;
+      targetCtx.lineWidth = 2 * scaleRatio;
+      const len = 12 * scaleRatio;
+      const offset = 4 * scaleRatio;
 
       targetCtx.beginPath();
       targetCtx.moveTo(x - offset - len, y);
@@ -976,6 +976,8 @@
     function updateModalPreviewImage() {
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.imageSmoothingEnabled = true;
+      tempCtx.imageSmoothingQuality = 'high';
 
       if (currentExportMode === 'single') {
         const z = baseZones[0];
@@ -1013,26 +1015,29 @@
         tempCtx.restore();
 
       } else {
+        // 設定為最高畫質 2160 * 2160 px (相對於原尺寸 720 放大 3 倍)
+        const EXPORT_SIZE = 2160;
+        const scaleRatio = EXPORT_SIZE / 720; // 3
         const startX = 820;
         const startY = 60;
-        const size = 720;
 
-        tempCanvas.width = size;
-        tempCanvas.height = size;
+        tempCanvas.width = EXPORT_SIZE;
+        tempCanvas.height = EXPORT_SIZE;
 
-        // 輸出底色維持透明/白色背景，未放照片的格子不繪製任何東西
         tempCtx.fillStyle = '#FFFFFF';
-        tempCtx.fillRect(0, 0, size, size);
+        tempCtx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
 
         baseZones.slice(1).forEach(z => {
           if (!z.img) return; // 如果沒有照片，直接跳過不畫格子與背景
 
           tempCtx.save();
-          const drawX = z.x - startX;
-          const drawY = z.top - startY;
+          const drawX = (z.x - startX) * scaleRatio;
+          const drawY = (z.top - startY) * scaleRatio;
+          const drawW = z.w * scaleRatio;
+          const drawH = z.h * scaleRatio;
 
           tempCtx.beginPath();
-          tempCtx.rect(drawX, drawY, z.w, z.h);
+          tempCtx.rect(drawX, drawY, drawW, drawH);
           tempCtx.clip();
 
           tempCtx.fillStyle = z.bgColor;
@@ -1042,23 +1047,24 @@
             tempCtx.save();
             tempCtx.imageSmoothingEnabled = true;
             tempCtx.imageSmoothingQuality = 'high';
-            const centerX = drawX + z.w/2 + z.imgData.offsetX;
-            const centerY = drawY + z.h/2 + z.imgData.offsetY;
+            
+            const centerX = drawX + drawW/2 + (z.imgData.offsetX * scaleRatio);
+            const centerY = drawY + drawH/2 + (z.imgData.offsetY * scaleRatio);
             
             tempCtx.translate(centerX, centerY);
             tempCtx.rotate(z.imgData.angle * Math.PI / 180);
-            tempCtx.scale(z.imgData.scale, z.imgData.scale);
+            tempCtx.scale(z.imgData.scale * scaleRatio, z.imgData.scale * scaleRatio);
             
             tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
             tempCtx.restore();
           }
           tempCtx.restore();
 
-          drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          drawCropMarks(tempCtx, drawX, drawY, drawW, drawH, scaleRatio);
         });
       }
 
-      document.getElementById('modalPreviewImg').src = tempCanvas.toDataURL('image/jpeg', 0.92);
+      document.getElementById('modalPreviewImg').src = tempCanvas.toDataURL('image/jpeg', 0.98);
     }
 
     function closePreviewModal() {
@@ -1074,6 +1080,8 @@
     function confirmAndDownload() {
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.imageSmoothingEnabled = true;
+      tempCtx.imageSmoothingQuality = 'high';
 
       if (currentExportMode === 'single') {
         const z = baseZones[0];
@@ -1111,25 +1119,28 @@
         tempCtx.restore();
 
       } else {
+        const EXPORT_SIZE = 2160;
+        const scaleRatio = EXPORT_SIZE / 720;
         const startX = 820;
         const startY = 60;
-        const size = 720;
 
-        tempCanvas.width = size;
-        tempCanvas.height = size;
+        tempCanvas.width = EXPORT_SIZE;
+        tempCanvas.height = EXPORT_SIZE;
 
         tempCtx.fillStyle = '#FFFFFF';
-        tempCtx.fillRect(0, 0, size, size);
+        tempCtx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
 
         baseZones.slice(1).forEach(z => {
           if (!z.img) return; // 如果沒有照片，直接跳過不畫格子與背景
 
           tempCtx.save();
-          const drawX = z.x - startX;
-          const drawY = z.top - startY;
+          const drawX = (z.x - startX) * scaleRatio;
+          const drawY = (z.top - startY) * scaleRatio;
+          const drawW = z.w * scaleRatio;
+          const drawH = z.h * scaleRatio;
 
           tempCtx.beginPath();
-          tempCtx.rect(drawX, drawY, z.w, z.h);
+          tempCtx.rect(drawX, drawY, drawW, drawH);
           tempCtx.clip();
 
           tempCtx.fillStyle = z.bgColor;
@@ -1139,19 +1150,20 @@
             tempCtx.save();
             tempCtx.imageSmoothingEnabled = true;
             tempCtx.imageSmoothingQuality = 'high';
-            const centerX = drawX + z.w/2 + z.imgData.offsetX;
-            const centerY = drawY + z.h/2 + z.imgData.offsetY;
+            
+            const centerX = drawX + drawW/2 + (z.imgData.offsetX * scaleRatio);
+            const centerY = drawY + drawH/2 + (z.imgData.offsetY * scaleRatio);
             
             tempCtx.translate(centerX, centerY);
             tempCtx.rotate(z.imgData.angle * Math.PI / 180);
-            tempCtx.scale(z.imgData.scale, z.imgData.scale);
+            tempCtx.scale(z.imgData.scale * scaleRatio, z.imgData.scale * scaleRatio);
             
             tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
             tempCtx.restore();
           }
           tempCtx.restore();
 
-          drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          drawCropMarks(tempCtx, drawX, drawY, drawW, drawH, scaleRatio);
         });
       }
 
@@ -1159,13 +1171,13 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = currentExportMode === 'single' ? '左側單個照片框.jpg' : '右側720x720整面排版.jpg';
+        a.download = currentExportMode === 'single' ? '左側單個照片框.jpg' : '右側2160x2160高畫質整面排版.jpg';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         closePreviewModal();
-      }, 'image/jpeg', 0.92);
+      }, 'image/jpeg', 0.98);
     }
 
     const originalOpenPreviewModal = openPreviewModal;
