@@ -393,7 +393,6 @@
   <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
   <script>
-    // 畫布總尺寸設定 (設計稿座標系：左右各 720x720 正方形外框，總寬 1600, 高 840)
     const DESIGN_WIDTH = 1600;
     const DESIGN_HEIGHT = 840;
 
@@ -408,7 +407,6 @@
 
     let baseZones = [];
     (function initZones() {
-      // 1. 左側 720x720 正方形外框 (x: 60, y: 60, 寬 720, 高 720)
       const leftOuterX = 60;
       const leftOuterY = 60;
       const leftOuterSize = 720;
@@ -430,7 +428,6 @@
         currentBlobUrl: null
       });
 
-      // 2. 右側 720x720 正方形排版區 (x: 820, y: 60, 寬 720, 高 720)
       const rightStartX = 820;
       const rightStartY = 60;
       const rightSize = 720;
@@ -575,15 +572,13 @@
       }
     }
 
-    // 繪製四角裁切線（Crop Marks）輔助函式
     function drawCropMarks(targetCtx, x, y, w, h) {
       targetCtx.save();
-      targetCtx.strokeStyle = '#D4C3B3'; // 柔和咖啡色
+      targetCtx.strokeStyle = '#D4C3B3';
       targetCtx.lineWidth = 2;
-      const len = 12; // 裁切線長度
-      const offset = 4; // 與邊緣的微小間距
+      const len = 12;
+      const offset = 4;
 
-      // 左上角
       targetCtx.beginPath();
       targetCtx.moveTo(x - offset - len, y);
       targetCtx.lineTo(x - offset, y);
@@ -591,7 +586,6 @@
       targetCtx.lineTo(x, y - offset);
       targetCtx.stroke();
 
-      // 右上角
       targetCtx.beginPath();
       targetCtx.moveTo(x + w + offset, y);
       targetCtx.lineTo(x + w + offset + len, y);
@@ -599,7 +593,6 @@
       targetCtx.lineTo(x + w, y - offset);
       targetCtx.stroke();
 
-      // 左下角
       targetCtx.beginPath();
       targetCtx.moveTo(x - offset - len, y + h);
       targetCtx.lineTo(x - offset, y + h);
@@ -607,7 +600,6 @@
       targetCtx.lineTo(x, y + h + offset + len);
       targetCtx.stroke();
 
-      // 右下角
       targetCtx.beginPath();
       targetCtx.moveTo(x + w + offset, y + h);
       targetCtx.lineTo(x + w + offset + len, y + h);
@@ -628,7 +620,6 @@
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
 
-      // 繪製左右兩側 720x720 正方形外框
       ctx.save();
       ctx.strokeStyle = '#D4C3B3';
       ctx.lineWidth = 2.5;
@@ -636,7 +627,6 @@
       ctx.strokeRect(60, 60, 720, 720);
       ctx.strokeRect(820, 60, 720, 720);
 
-      // 繪製左側提示文字
       ctx.fillStyle = '#4a3b32';
       ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'center';
@@ -645,7 +635,6 @@
       ctx.fillText('請使用這區塊~', 60 + 720/2, 135);
       ctx.restore();
 
-      // 繪製所有上傳區域
       baseZones.forEach((z, idx) => {
         ctx.save();
         ctx.beginPath();
@@ -677,29 +666,13 @@
         }
         ctx.restore();
 
-        // 畫布操作畫面上的框線處理
-        if (idx === 0) {
-          // 左側單個框維持完整外框
-          ctx.save();
-          ctx.strokeStyle = '#B8A898';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.rect(z.x, z.top, z.w, z.h);
-          ctx.stroke();
-          ctx.restore();
-        } else if (z.img) {
-          // 右側鍵帽格子：若有圖片，畫布上同步顯示四角裁切線方便辨識
-          drawCropMarks(ctx, z.x, z.top, z.w, z.h);
-        } else {
-          // 右側鍵帽格子：若無圖片，顯示輕微框線供點擊
-          ctx.save();
-          ctx.strokeStyle = '#D4C3B3';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.rect(z.x, z.top, z.w, z.h);
-          ctx.stroke();
-          ctx.restore();
-        }
+        ctx.save();
+        ctx.strokeStyle = idx === 0 ? '#B8A898' : '#D4C3B3';
+        ctx.lineWidth = idx === 0 ? 2.5 : 1;
+        ctx.beginPath();
+        ctx.rect(z.x, z.top, z.w, z.h);
+        ctx.stroke();
+        ctx.restore();
       });
 
       if (selectedZoneIndex !== -1) {
@@ -1005,7 +978,6 @@
       const tempCtx = tempCanvas.getContext('2d');
 
       if (currentExportMode === 'single') {
-        // 只輸出左側單個上傳照片框框範圍 (460x460) - 維持原樣不加裁切線
         const z = baseZones[0];
         tempCanvas.width = z.w;
         tempCanvas.height = z.h;
@@ -1079,9 +1051,14 @@
           }
           tempCtx.restore();
 
-          // 右側整面輸出時：若格子有圖片，在四個角加上裁切導線（不加外框）
           if (z.img) {
             drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          } else {
+            tempCtx.save();
+            tempCtx.strokeStyle = '#E8DFD5';
+            tempCtx.lineWidth = 1;
+            tempCtx.strokeRect(drawX, drawY, z.w, z.h);
+            tempCtx.restore();
           }
         });
       }
@@ -1177,9 +1154,14 @@
           }
           tempCtx.restore();
 
-          // 右側整面輸出時：若格子有圖片，在四個角加上裁切導線（不加外框）
           if (z.img) {
             drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          } else {
+            tempCtx.save();
+            tempCtx.strokeStyle = '#E8DFD5';
+            tempCtx.lineWidth = 1;
+            tempCtx.strokeRect(drawX, drawY, z.w, z.h);
+            tempCtx.restore();
           }
         });
       }
