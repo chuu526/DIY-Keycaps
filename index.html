@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY</title>
+  <title>鍵帽與單個DIY排版</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -14,11 +14,12 @@
       background: #FFFAF0; 
       margin: 0; 
       box-sizing: border-box;
+      touch-action: manipulation; 
     }
 
     .main-container {
       width: 100%;
-      max-width: 950px;
+      max-width: 1050px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -26,7 +27,7 @@
 
     .header-area {
       width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
       position: relative;
       display: flex;
       justify-content: space-between;
@@ -99,8 +100,8 @@
     h2 { margin: 0; font-size: 22px; color: #4a3b32; }
 
     .canvas-wrapper { 
-      width: 900px; 
-      height: 758.82px; 
+      width: 1000px; 
+      height: 500px; 
       display: flex; 
       justify-content: center; 
       margin-bottom: 15px;
@@ -125,7 +126,7 @@
       flex-wrap: wrap; 
       justify-content: center; 
       width: 100%; 
-      max-width: 900px; 
+      max-width: 1000px; 
       margin-bottom: 12px;
     }
 
@@ -164,7 +165,7 @@
       padding: 10px 16px;
       border-radius: 6px;
       width: 100%;
-      max-width: 900px;
+      max-width: 1000px;
       box-sizing: border-box;
       margin-bottom: 12px;
       font-size: 14px;
@@ -209,7 +210,7 @@
       font-size: 13px; 
       color: #d48800; 
       width: 100%; 
-      max-width: 900px; 
+      max-width: 1000px; 
       box-sizing: border-box; 
     }
     .tip-box ul { margin: 5px 0 0 18px; padding: 0; }
@@ -228,7 +229,7 @@
       padding: 22px;
       border-radius: 12px;
       width: 90%;
-      max-width: 420px;
+      max-width: 440px;
       text-align: center;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
       max-height: 90vh;
@@ -238,9 +239,31 @@
     .modal-content h3 { margin-top: 0; color: #4a3b32; font-size: 20px; }
     .modal-content p { font-size: 13px; color: #555; line-height: 1.4; margin-bottom: 12px; }
     
+    .export-mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .export-tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #D4C3B3;
+      background: #f9f4ec;
+      color: #5c4033;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .export-tab-btn.active {
+      background: #9E7B66;
+      color: white;
+      border-color: #8b6a55;
+    }
+
     .preview-img-container {
       width: 100%;
-      height: 210px;
+      height: 220px;
       border: 1px solid #D4C3B3;
       border-radius: 6px;
       margin-bottom: 15px;
@@ -251,8 +274,8 @@
       overflow: hidden;
     }
     .preview-img-container img {
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
       display: block;
     }
@@ -288,8 +311,8 @@
     }
     .btn-modal-close:hover { background: #d2bc94; }
 
-    @media (max-width: 950px) {
-      .canvas-wrapper { width: 100%; height: auto; aspect-ratio: 102 / 86; }
+    @media (max-width: 1050px) {
+      .canvas-wrapper { width: 100%; height: auto; aspect-ratio: 1600 / 840; }
     }
   </style>
 </head>
@@ -299,7 +322,7 @@
     <div class="header-area">
       <div class="header-left-group">
         <img src="The創 LOGO.png" alt="The創 LOGO" class="top-left-logo" onerror="this.style.display='none'">
-        <h2>鍵帽DIY</h2>
+        <h2>排版DIY</h2>
       </div>
       <div class="top-right-history">
         <button class="btn-history-icon" onclick="undoAction()" title="返回上一步">↶</button>
@@ -318,7 +341,7 @@
 
     <div class="color-picker-bar">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span id="colorBarLabel">🎨 請點選上方任一鍵帽以設定底色：</span>
+        <span id="colorBarLabel">🎨 請點選上方任一區域以設定底色：</span>
       </div>
       <div class="color-presets">
         <input type="color" id="zoneBgColorPicker" value="#FFFFFF" onchange="changeSelectedZoneBgColor(this.value)">
@@ -338,7 +361,7 @@
     <div class="tip-box">
       <b>✂️ 操作說明：</b> 
       <ul>
-        <li>點擊任一直角鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
+        <li>點擊左側單個製作區或右側任一鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
         <li>製作完成記得上傳到表單呦，告知店員就會幫您製作了!</li>
         <li>The創🌳台中市北區一中街173號。</li>
       </ul>
@@ -348,9 +371,14 @@
   <!-- 完成預覽視窗 -->
   <div class="modal-overlay" id="previewModal" onclick="checkOutsideClose(event, 'previewModal')">
     <div class="modal-content">
-      <h3>🎉 您的鍵帽排版完成！</h3>
-      <p>請確認下方預覽圖，點擊下載即可將高畫質排版圖片儲存至您的裝置！</p>
+      <h3>🎉 您的排版完成！</h3>
+      <p>請確認下方預覽圖，您可以切換下載「左側單個照片框」或「右側 720×720 整面排版」：</p>
       
+      <div class="export-mode-tabs">
+        <button class="export-tab-btn active" id="tabSingle" onclick="switchExportMode('single')">📦 左側單個照片框</button>
+        <button class="export-tab-btn" id="tabFull" onclick="switchExportMode('full')">🖼️ 右側 720×720 整面</button>
+      </div>
+
       <div class="preview-img-container">
         <img id="modalPreviewImg" src="" alt="排版預覽圖">
       </div>
@@ -365,8 +393,9 @@
   <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
   <script>
-    const DESIGN_WIDTH = 1200;
-    const DESIGN_HEIGHT = 1011.76;
+    // 畫布總尺寸設定 (設計稿座標系：左右各 720x720 正方形外框，總寬 1600, 高 840)
+    const DESIGN_WIDTH = 1600;
+    const DESIGN_HEIGHT = 840;
 
     const canvas = document.getElementById('diyCanvas');
     const wrapper = document.getElementById('canvasWrapper');
@@ -375,35 +404,56 @@
     const trashBtn = document.getElementById('trashBtn');
 
     let selectedZoneIndex = -1;
+    let currentExportMode = 'single';
 
     let baseZones = [];
-    (function initKeycapZones() {
-      const frameW = DESIGN_WIDTH; 
-      const frameH = DESIGN_HEIGHT;  
+    (function initZones() {
+      // 1. 左側 720x720 正方形外框 (x: 60, y: 60, 寬 720, 高 720)
+      const leftOuterX = 60;
+      const leftOuterY = 60;
+      const leftOuterSize = 720;
+      const singleBoxSize = 460;
       
-      const originX = 0; 
-      const originY = 0; 
+      baseZones.push({
+        id: '單個製作區',
+        x: leftOuterX + (leftOuterSize - singleBoxSize) / 2,
+        top: leftOuterY + 160,
+        w: singleBoxSize,
+        h: singleBoxSize,
+        type: 'single',
+        labelMain: '單個製作',
+        labelSub: '上傳',
+        img: null,
+        bgColor: '#FFFFFF',
+        imgData: null,
+        imgSrcBlob: null,
+        currentBlobUrl: null
+      });
 
-      const scaleX = DESIGN_WIDTH / 102;
-      const scaleY = DESIGN_HEIGHT / 86;
-
-      const ml = 10 * scaleX;     
-      const mt = 9 * scaleY;      
-      const size = 10.5 * scaleX; 
+      // 2. 右側 720x720 正方形排版區 (x: 820, y: 60, 寬 720, 高 720)
+      const rightStartX = 820;
+      const rightStartY = 60;
+      const rightSize = 720;
       
-      const gapX = (102 - 10 - 26 - 52.5) / 4 * scaleX;
-      const gapY = (86 - 9 - 9 - 52.5) / 4 * scaleY;
+      const cols = 5;
+      const rows = 5;
+      const keycapSize = 105;
+      const totalGridW = cols * keycapSize;
+      const totalGridH = rows * keycapSize;
+      
+      const gapX = (rightSize - totalGridW) / (cols + 1);
+      const gapY = (rightSize - totalGridH) / (rows + 1);
 
-      for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
-          const x = originX + ml + c * (size + gapX);
-          const top = originY + mt + r * (size + gapY);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = rightStartX + gapX + c * (keycapSize + gapX);
+          const top = rightStartY + gapY + r * (keycapSize + gapY);
           baseZones.push({
-            id: `直角鍵帽_${r+1}_${c+1}`,
+            id: `鍵帽_${r+1}_${c+1}`,
             x: x,
             top: top,
-            w: size,
-            h: size,
+            w: keycapSize,
+            h: keycapSize,
             type: 'keycap',
             labelMain: `第 ${r+1} 排 ${c+1}`,
             labelSub: '上傳',
@@ -466,7 +516,7 @@
     function redoAction() {
       if (redoStack.length === 0) return;
       undoStack.push(getCurrentStateSnapshot());
-      restoreState(redoStack.pop());
+      restoreState(undoStack.pop());
     }
 
     window.addEventListener('keydown', (e) => {
@@ -519,13 +569,56 @@
           trashBtn.disabled = true;
         }
       } else {
-        label.innerHTML = `🎨 請先點選上方任一鍵帽以設定底色：`;
+        label.innerHTML = `🎨 請先點選上方任一區域以設定底色：`;
         picker.disabled = true;
         trashBtn.disabled = true;
       }
     }
 
-    function render(isExporting = false) {
+    // 繪製四角裁切線（Crop Marks）輔助函式
+    function drawCropMarks(targetCtx, x, y, w, h) {
+      targetCtx.save();
+      targetCtx.strokeStyle = '#D4C3B3'; // 柔和咖啡色
+      targetCtx.lineWidth = 2;
+      const len = 12; // 裁切線長度
+      const offset = 4; // 與邊緣的微小間距
+
+      // 左上角
+      targetCtx.beginPath();
+      targetCtx.moveTo(x - offset - len, y);
+      targetCtx.lineTo(x - offset, y);
+      targetCtx.moveTo(x, y - offset - len);
+      targetCtx.lineTo(x, y - offset);
+      targetCtx.stroke();
+
+      // 右上角
+      targetCtx.beginPath();
+      targetCtx.moveTo(x + w + offset, y);
+      targetCtx.lineTo(x + w + offset + len, y);
+      targetCtx.moveTo(x + w, y - offset - len);
+      targetCtx.lineTo(x + w, y - offset);
+      targetCtx.stroke();
+
+      // 左下角
+      targetCtx.beginPath();
+      targetCtx.moveTo(x - offset - len, y + h);
+      targetCtx.lineTo(x - offset, y + h);
+      targetCtx.moveTo(x, y + h + offset);
+      targetCtx.lineTo(x, y + h + offset + len);
+      targetCtx.stroke();
+
+      // 右下角
+      targetCtx.beginPath();
+      targetCtx.moveTo(x + w + offset, y + h);
+      targetCtx.lineTo(x + w + offset + len, y + h);
+      targetCtx.moveTo(x + w, y + h + offset);
+      targetCtx.lineTo(x + w, y + h + offset + len);
+      targetCtx.stroke();
+
+      targetCtx.restore();
+    }
+
+    function render() {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
@@ -535,7 +628,25 @@
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
 
-      baseZones.forEach((z) => {
+      // 繪製左右兩側 720x720 正方形外框
+      ctx.save();
+      ctx.strokeStyle = '#D4C3B3';
+      ctx.lineWidth = 2.5;
+
+      ctx.strokeRect(60, 60, 720, 720);
+      ctx.strokeRect(820, 60, 720, 720);
+
+      // 繪製左側提示文字
+      ctx.fillStyle = '#4a3b32';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('如果是製作單個', 60 + 720/2, 100);
+      ctx.fillText('請使用這區塊~', 60 + 720/2, 135);
+      ctx.restore();
+
+      // 繪製所有上傳區域
+      baseZones.forEach((z, idx) => {
         ctx.save();
         ctx.beginPath();
         ctx.rect(z.x, z.top, z.w, z.h);
@@ -557,19 +668,33 @@
           
           ctx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
           ctx.restore();
-        } else if (!isExporting) {
+        } else {
           ctx.fillStyle = '#7C6A58';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.font = 'bold 14px sans-serif';
+          ctx.font = idx === 0 ? 'bold 20px sans-serif' : 'bold 13px sans-serif';
           ctx.fillText('上傳', z.x + z.w/2, z.top + z.h/2);
         }
         ctx.restore();
 
-        if (!isExporting) {
+        // 畫布操作畫面上的框線處理
+        if (idx === 0) {
+          // 左側單個框維持完整外框
           ctx.save();
           ctx.strokeStyle = '#B8A898';
-          ctx.lineWidth = 1.8;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.rect(z.x, z.top, z.w, z.h);
+          ctx.stroke();
+          ctx.restore();
+        } else if (z.img) {
+          // 右側鍵帽格子：若有圖片，畫布上同步顯示四角裁切線方便辨識
+          drawCropMarks(ctx, z.x, z.top, z.w, z.h);
+        } else {
+          // 右側鍵帽格子：若無圖片，顯示輕微框線供點擊
+          ctx.save();
+          ctx.strokeStyle = '#D4C3B3';
+          ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.rect(z.x, z.top, z.w, z.h);
           ctx.stroke();
@@ -577,7 +702,7 @@
         }
       });
 
-      if (!isExporting && selectedZoneIndex !== -1) {
+      if (selectedZoneIndex !== -1) {
         const z = baseZones[selectedZoneIndex];
         if (z.img && z.imgData) {
           drawTransformControls(z);
@@ -686,7 +811,6 @@
     canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
 
     function handleCanvasInteraction(e) {
-      // 雙指觸控時，交由瀏覽器處理整頁縮放
       if (e.touches && e.touches.length >= 2) {
         selectedZoneIndex = -1;
         activeMode = null;
@@ -780,7 +904,6 @@
       if (e.touches && e.touches.length >= 2) return;
       if (!activeMode || selectedZoneIndex === -1) return;
       
-      // 操作照片時禁止畫面跟著移動
       if (e.cancelable) e.preventDefault();
 
       const { x, y } = getCanvasPos(e);
@@ -853,11 +976,117 @@
 
     function openPreviewModal() {
       selectedZoneIndex = -1;
-      render(true);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-      document.getElementById('modalPreviewImg').src = dataUrl;
+
+      let hasLeftImg = baseZones[0].img !== null;
+      let hasRightImg = baseZones.slice(1).some(z => z.img !== null);
+
+      if (hasLeftImg && !hasRightImg) {
+        switchExportMode('single', false);
+      } else {
+        switchExportMode('full', false);
+      }
+
       document.getElementById('previewModal').style.display = 'flex';
-      render(false);
+      render();
+    }
+
+    function switchExportMode(mode, updatePreview = true) {
+      currentExportMode = mode;
+      document.getElementById('tabSingle').classList.toggle('active', mode === 'single');
+      document.getElementById('tabFull').classList.toggle('active', mode === 'full');
+
+      if (updatePreview) {
+        updateModalPreviewImage();
+      }
+    }
+
+    function updateModalPreviewImage() {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+
+      if (currentExportMode === 'single') {
+        // 只輸出左側單個上傳照片框框範圍 (460x460) - 維持原樣不加裁切線
+        const z = baseZones[0];
+        tempCanvas.width = z.w;
+        tempCanvas.height = z.h;
+
+        tempCtx.fillStyle = z.bgColor;
+        tempCtx.fillRect(0, 0, z.w, z.h);
+
+        if (z.img && z.imgData) {
+          tempCtx.save();
+          tempCtx.imageSmoothingEnabled = true;
+          tempCtx.imageSmoothingQuality = 'high';
+          const centerX = z.w / 2 + z.imgData.offsetX;
+          const centerY = z.h / 2 + z.imgData.offsetY;
+          
+          tempCtx.translate(centerX, centerY);
+          tempCtx.rotate(z.imgData.angle * Math.PI / 180);
+          tempCtx.scale(z.imgData.scale, z.imgData.scale);
+          
+          tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+          tempCtx.restore();
+        } else {
+          tempCtx.fillStyle = '#7C6A58';
+          tempCtx.textAlign = 'center';
+          tempCtx.textBaseline = 'middle';
+          tempCtx.font = 'bold 20px sans-serif';
+          tempCtx.fillText('上傳', z.w / 2, z.h / 2);
+        }
+
+        tempCtx.save();
+        tempCtx.strokeStyle = '#B8A898';
+        tempCtx.lineWidth = 3;
+        tempCtx.strokeRect(0, 0, z.w, z.h);
+        tempCtx.restore();
+
+      } else {
+        const startX = 820;
+        const startY = 60;
+        const size = 720;
+
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+
+        tempCtx.fillStyle = '#FFFFFF';
+        tempCtx.fillRect(0, 0, size, size);
+
+        baseZones.slice(1).forEach(z => {
+          tempCtx.save();
+          const drawX = z.x - startX;
+          const drawY = z.top - startY;
+
+          tempCtx.beginPath();
+          tempCtx.rect(drawX, drawY, z.w, z.h);
+          tempCtx.clip();
+
+          tempCtx.fillStyle = z.bgColor;
+          tempCtx.fill();
+
+          if (z.img && z.imgData) {
+            tempCtx.save();
+            tempCtx.imageSmoothingEnabled = true;
+            tempCtx.imageSmoothingQuality = 'high';
+            const centerX = drawX + z.w/2 + z.imgData.offsetX;
+            const centerY = drawY + z.h/2 + z.imgData.offsetY;
+            
+            tempCtx.translate(centerX, centerY);
+            tempCtx.rotate(z.imgData.angle * Math.PI / 180);
+            tempCtx.scale(z.imgData.scale, z.imgData.scale);
+            
+            tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+            tempCtx.restore();
+          }
+          tempCtx.restore();
+
+          // 右側整面輸出時：若格子有圖片，在四個角加上裁切導線（不加外框）
+          if (z.img) {
+            drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          }
+        });
+      }
+
+      document.getElementById('modalPreviewImg').src = tempCanvas.toDataURL('image/jpeg', 0.92);
     }
 
     function closePreviewModal() {
@@ -871,20 +1100,108 @@
     }
 
     function confirmAndDownload() {
-      render(true);
-      canvas.toBlob(function(blob) {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+
+      if (currentExportMode === 'single') {
+        const z = baseZones[0];
+        tempCanvas.width = z.w;
+        tempCanvas.height = z.h;
+
+        tempCtx.fillStyle = z.bgColor;
+        tempCtx.fillRect(0, 0, z.w, z.h);
+
+        if (z.img && z.imgData) {
+          tempCtx.save();
+          tempCtx.imageSmoothingEnabled = true;
+          tempCtx.imageSmoothingQuality = 'high';
+          const centerX = z.w / 2 + z.imgData.offsetX;
+          const centerY = z.h / 2 + z.imgData.offsetY;
+          
+          tempCtx.translate(centerX, centerY);
+          tempCtx.rotate(z.imgData.angle * Math.PI / 180);
+          tempCtx.scale(z.imgData.scale, z.imgData.scale);
+          
+          tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+          tempCtx.restore();
+        } else {
+          tempCtx.fillStyle = '#7C6A58';
+          tempCtx.textAlign = 'center';
+          tempCtx.textBaseline = 'middle';
+          tempCtx.font = 'bold 20px sans-serif';
+          tempCtx.fillText('上傳', z.w / 2, z.h / 2);
+        }
+
+        tempCtx.save();
+        tempCtx.strokeStyle = '#B8A898';
+        tempCtx.lineWidth = 3;
+        tempCtx.strokeRect(0, 0, z.w, z.h);
+        tempCtx.restore();
+
+      } else {
+        const startX = 820;
+        const startY = 60;
+        const size = 720;
+
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+
+        tempCtx.fillStyle = '#FFFFFF';
+        tempCtx.fillRect(0, 0, size, size);
+
+        baseZones.slice(1).forEach(z => {
+          tempCtx.save();
+          const drawX = z.x - startX;
+          const drawY = z.top - startY;
+
+          tempCtx.beginPath();
+          tempCtx.rect(drawX, drawY, z.w, z.h);
+          tempCtx.clip();
+
+          tempCtx.fillStyle = z.bgColor;
+          tempCtx.fill();
+
+          if (z.img && z.imgData) {
+            tempCtx.save();
+            tempCtx.imageSmoothingEnabled = true;
+            tempCtx.imageSmoothingQuality = 'high';
+            const centerX = drawX + z.w/2 + z.imgData.offsetX;
+            const centerY = drawY + z.h/2 + z.imgData.offsetY;
+            
+            tempCtx.translate(centerX, centerY);
+            tempCtx.rotate(z.imgData.angle * Math.PI / 180);
+            tempCtx.scale(z.imgData.scale, z.imgData.scale);
+            
+            tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+            tempCtx.restore();
+          }
+          tempCtx.restore();
+
+          // 右側整面輸出時：若格子有圖片，在四個角加上裁切導線（不加外框）
+          if (z.img) {
+            drawCropMarks(tempCtx, drawX, drawY, z.w, z.h);
+          }
+        });
+      }
+
+      tempCanvas.toBlob(function(blob) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `我的客製鍵帽排版.jpg`;
+        a.download = currentExportMode === 'single' ? '左側單個照片框.jpg' : '右側720x720整面排版.jpg';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        render(false);
         closePreviewModal();
       }, 'image/jpeg', 0.92);
     }
+
+    const originalOpenPreviewModal = openPreviewModal;
+    openPreviewModal = function() {
+      originalOpenPreviewModal();
+      updateModalPreviewImage();
+    };
 
     window.onload = function() {
       initCanvasSize();
