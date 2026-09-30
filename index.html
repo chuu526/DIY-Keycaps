@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY排版</title>
+  <title>鍵帽DIY排版 (10.5x10.5mm 格子精確版)</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -19,7 +19,7 @@
 
     .main-container {
       width: 100%;
-      max-width: 1050px;
+      max-width: 900px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -27,7 +27,7 @@
 
     .header-area {
       width: 100%;
-      max-width: 1000px;
+      max-width: 820px;
       position: relative;
       display: flex;
       justify-content: space-between;
@@ -101,12 +101,13 @@
 
     .step-section {
       width: 100%;
-      max-width: 1000px;
+      max-width: 820px;
       background: #FFFFFF;
       border: 2px solid #D4C3B3;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       border-radius: 12px;
-      padding: 20px;
+      /* 將左右 padding 縮小，讓兩側留白變窄 */
+      padding: 20px 15px; 
       margin-bottom: 15px;
       box-sizing: border-box;
       display: flex;
@@ -127,8 +128,8 @@
     }
 
     .canvas-wrapper { 
-      width: 900px; 
-      height: 900px; 
+      width: 750px; 
+      height: 750px; 
       display: flex; 
       justify-content: center; 
       margin-bottom: 5px;
@@ -188,7 +189,7 @@
       font-size: 13px; 
       color: #d48800; 
       width: 100%; 
-      max-width: 1000px; 
+      max-width: 820px; 
       box-sizing: border-box; 
     }
     .tip-box ul { margin: 5px 0 0 18px; padding: 0; }
@@ -267,7 +268,7 @@
     }
     .btn-modal-close:hover { background: #d2bc94; }
 
-    @media (max-width: 950px) {
+    @media (max-width: 850px) {
       .canvas-wrapper { width: 100%; height: auto; aspect-ratio: 1 / 1; }
     }
   </style>
@@ -309,17 +310,17 @@
 
     <!-- 第三步：提交圖片 -->
     <div class="step-section">
-      <div class="step-title">第三步：提交圖片 (需登入 GOOGLE)</div>
+      <div class="step-title">第三步：提交圖片 (需登入 GOOGLE 表單)</div>
       <div class="controls">
         <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form">✨ 前往填寫表單上傳圖片</a>
       </div>
     </div>
 
     <div class="tip-box">
-      <b>✂️ 操作說明：</b> 
+      <b>✂ 操作說明：</b> 
       <ul>
+        <li>格子大小：10.5×10.5mm，格子間距：4mm，右側保留 9mm 邊距。</li>
         <li>點擊下方任一鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
-        <li>製作完成記得先保存圖片，再到第三步上傳至表單呦！</li>
         <li>The創🌳台中市北區一中街173號。</li>
       </ul>
     </div>
@@ -345,7 +346,12 @@
   <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
   <script>
-    const DESIGN_SIZE = 900;
+    const DESIGN_WIDTH_MM = 86;
+    const DESIGN_HEIGHT_MM = 86;
+    
+    const mmToPx = 10;
+    const DESIGN_WIDTH = DESIGN_WIDTH_MM * mmToPx;   // 860 px
+    const DESIGN_HEIGHT = DESIGN_HEIGHT_MM * mmToPx; // 860 px
 
     const canvas = document.getElementById('diyCanvas');
     const wrapper = document.getElementById('canvasWrapper');
@@ -357,23 +363,17 @@
     let baseZones = [];
 
     (function initZones() {
-      const startX = 25;
-      const startY = 25;
-      const totalSize = 850;
-      
+      const leftMargin = 8.5 * mmToPx;  
+      const topMargin = 8.5 * mmToPx;   
+      const keycapSize = 10.5 * mmToPx; 
+      const gap = 4 * mmToPx;           
       const cols = 5;
       const rows = 5;
-      const keycapSize = 148;
-      const totalGridW = cols * keycapSize;
-      const totalGridH = rows * keycapSize;
-      
-      const gapX = (totalSize - totalGridW) / (cols + 1);
-      const gapY = (totalSize - totalGridH) / (rows + 1);
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const x = startX + gapX + c * (keycapSize + gapX);
-          const top = startY + gapY + r * (keycapSize + gapY);
+          const x = leftMargin + c * (keycapSize + gap);
+          const top = topMargin + r * (keycapSize + gap);
           baseZones.push({
             id: `鍵帽_${r+1}_${c+1}`,
             x: x,
@@ -457,8 +457,8 @@
 
     function initCanvasSize() {
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = DESIGN_SIZE * dpr;
-      canvas.height = DESIGN_SIZE * dpr;
+      canvas.width = DESIGN_WIDTH * dpr;
+      canvas.height = DESIGN_HEIGHT * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       render();
     }
@@ -479,10 +479,10 @@
       ctx.imageSmoothingQuality = 'high';
 
       ctx.save();
-      ctx.clearRect(0, 0, DESIGN_SIZE, DESIGN_SIZE);
+      ctx.clearRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, DESIGN_SIZE, DESIGN_SIZE);
+      ctx.fillRect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
 
       baseZones.forEach((z, idx) => {
         ctx.save();
@@ -510,7 +510,7 @@
           ctx.fillStyle = '#7C6A58';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.font = 'bold 15px sans-serif';
+          ctx.font = 'bold 13px sans-serif';
           ctx.fillText('上傳', z.x + z.w/2, z.top + z.h/2);
         }
         ctx.restore();
@@ -612,8 +612,8 @@
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const rawX = (clientX - rect.left) * (DESIGN_SIZE / rect.width);
-      const rawY = (clientY - rect.top) * (DESIGN_SIZE / rect.height);
+      const rawX = (clientX - rect.left) * (DESIGN_WIDTH / rect.width);
+      const rawY = (clientY - rect.top) * (DESIGN_HEIGHT / rect.height);
       return { x: rawX, y: rawY };
     }
 
@@ -639,7 +639,7 @@
       }
 
       const { x, y } = getCanvasPos(e);
-      const hitThreshold = 35; // 稍微調大觸控容錯範圍
+      const hitThreshold = 35;
 
       if (selectedZoneIndex !== -1) {
         const z = baseZones[selectedZoneIndex];
@@ -740,7 +740,6 @@
         const currentDist = Math.hypot(x - centerX, y - centerY);
         if (initialDist > 0) {
           const ratio = currentDist / initialDist;
-          // 解除過小的限制，允許使用者自由縮小
           z.imgData.scale = Math.max(0.01, initialScale * ratio);
         }
       } else if (activeMode === 'rotate') {
@@ -796,73 +795,21 @@
 
     function openPreviewModal() {
       selectedZoneIndex = -1;
-      updateModalPreviewImage();
-      document.getElementById('previewModal').style.display = 'flex';
       render();
-    }
 
-    function updateModalPreviewImage() {
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.imageSmoothingEnabled = true;
-      tempCtx.imageSmoothingQuality = 'high';
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 2160;
+      exportCanvas.height = 2160;
+      const expCtx = exportCanvas.getContext('2d');
 
-      const EXPORT_SIZE = 2160;
-      const startX = 25;
-      const startY = 25;
-      const totalSize = 850;
-      const scaleRatio = EXPORT_SIZE / totalSize;
+      expCtx.fillStyle = '#FFFFFF';
+      expCtx.fillRect(0, 0, 2160, 2160);
 
-      tempCanvas.width = EXPORT_SIZE;
-      tempCanvas.height = EXPORT_SIZE;
+      expCtx.drawImage(canvas, 0, 0, 2160, 2160);
 
-      tempCtx.fillStyle = '#FFFFFF';
-      tempCtx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-
-      baseZones.forEach(z => {
-        if (!z.img) return;
-
-        tempCtx.save();
-        const drawX = (z.x - startX) * scaleRatio;
-        const drawY = (z.top - startY) * scaleRatio;
-        const drawW = z.w * scaleRatio;
-        const drawH = z.h * scaleRatio;
-
-        tempCtx.beginPath();
-        tempCtx.rect(drawX, drawY, drawW, drawH);
-        tempCtx.clip();
-
-        tempCtx.fillStyle = z.bgColor;
-        tempCtx.fill();
-
-        if (z.img && z.imgData) {
-          tempCtx.save();
-          tempCtx.imageSmoothingEnabled = true;
-          tempCtx.imageSmoothingQuality = 'high';
-          
-          const centerX = drawX + drawW/2 + (z.imgData.offsetX * scaleRatio);
-          const centerY = drawY + drawH/2 + (z.imgData.offsetY * scaleRatio);
-          
-          tempCtx.translate(centerX, centerY);
-          tempCtx.rotate(z.imgData.angle * Math.PI / 180);
-          tempCtx.scale(z.imgData.scale * scaleRatio, z.imgData.scale * scaleRatio);
-          
-          tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
-          tempCtx.restore();
-        }
-        tempCtx.restore();
-
-        // 加上非常細的四方形裁切線
-        tempCtx.save();
-        tempCtx.strokeStyle = '#999999';
-        tempCtx.lineWidth = 1;
-        tempCtx.beginPath();
-        tempCtx.rect(drawX, drawY, drawW, drawH);
-        tempCtx.stroke();
-        tempCtx.restore();
-      });
-
-      document.getElementById('modalPreviewImg').src = tempCanvas.toDataURL('image/jpeg', 0.98);
+      const dataUrl = exportCanvas.toDataURL('image/png');
+      document.getElementById('modalPreviewImg').src = dataUrl;
+      document.getElementById('previewModal').style.display = 'flex';
     }
 
     function closePreviewModal() {
@@ -871,86 +818,19 @@
 
     function checkOutsideClose(e, modalId) {
       if (e.target.id === modalId) {
-        document.getElementById(modalId).style.display = 'none';
+        closePreviewModal();
       }
     }
 
     function confirmAndDownload() {
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.imageSmoothingEnabled = true;
-      tempCtx.imageSmoothingQuality = 'high';
-
-      const EXPORT_SIZE = 2160;
-      const startX = 25;
-      const startY = 25;
-      const totalSize = 850;
-      const scaleRatio = EXPORT_SIZE / totalSize;
-
-      tempCanvas.width = EXPORT_SIZE;
-      tempCanvas.height = EXPORT_SIZE;
-
-      tempCtx.fillStyle = '#FFFFFF';
-      tempCtx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-
-      baseZones.forEach(z => {
-        if (!z.img) return;
-
-        tempCtx.save();
-        const drawX = (z.x - startX) * scaleRatio;
-        const drawY = (z.top - startY) * scaleRatio;
-        const drawW = z.w * scaleRatio;
-        const drawH = z.h * scaleRatio;
-
-        tempCtx.beginPath();
-        tempCtx.rect(drawX, drawY, drawW, drawH);
-        tempCtx.clip();
-
-        tempCtx.fillStyle = z.bgColor;
-        tempCtx.fill();
-
-        if (z.img && z.imgData) {
-          tempCtx.save();
-          tempCtx.imageSmoothingEnabled = true;
-          tempCtx.imageSmoothingQuality = 'high';
-          
-          const centerX = drawX + drawW/2 + (z.imgData.offsetX * scaleRatio);
-          const centerY = drawY + drawH/2 + (z.imgData.offsetY * scaleRatio);
-          
-          tempCtx.translate(centerX, centerY);
-          tempCtx.rotate(z.imgData.angle * Math.PI / 180);
-          tempCtx.scale(z.imgData.scale * scaleRatio, z.imgData.scale * scaleRatio);
-          
-          tempCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
-          tempCtx.restore();
-        }
-        tempCtx.restore();
-
-        tempCtx.save();
-        tempCtx.strokeStyle = '#999999';
-        tempCtx.lineWidth = 1;
-        tempCtx.beginPath();
-        tempCtx.rect(drawX, drawY, drawW, drawH);
-        tempCtx.stroke();
-        tempCtx.restore();
-      });
-
-      tempCanvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '鍵帽2160x2160高畫質排版.jpg';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        closePreviewModal();
-      }, 'image/jpeg', 0.98);
+      const dataUrl = document.getElementById('modalPreviewImg').src;
+      const link = document.createElement('a');
+      link.download = 'keycap_layout_10.5mm_86x86.png';
+      link.href = dataUrl;
+      link.click();
     }
 
-    window.onload = function() {
-      initCanvasSize();
-    };
+    initCanvasSize();
   </script>
 </body>
 </html>
