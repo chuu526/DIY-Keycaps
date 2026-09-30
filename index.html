@@ -639,7 +639,7 @@
       }
 
       const { x, y } = getCanvasPos(e);
-      const hitThreshold = 30;
+      const hitThreshold = 35; // 稍微調大觸控容錯範圍
 
       if (selectedZoneIndex !== -1) {
         const z = baseZones[selectedZoneIndex];
@@ -661,7 +661,7 @@
               
               const centerX = z.x + z.w/2 + z.imgData.offsetX;
               const centerY = z.top + z.h/2 + z.imgData.offsetY;
-              initialDist = Math.max(10, Math.hypot(x - centerX, y - centerY));
+              initialDist = Math.max(5, Math.hypot(x - centerX, y - centerY));
               if (e.cancelable) e.preventDefault();
               return;
             }
@@ -722,7 +722,7 @@
 
     function handlePointerMove(e) {
       if (e.touches && e.touches.length >= 2) return;
-      if (!activeMode || selectedZoneIndex !== -1 == false) return;
+      if (!activeMode || selectedZoneIndex === -1) return;
       
       if (e.cancelable) e.preventDefault();
 
@@ -740,7 +740,8 @@
         const currentDist = Math.hypot(x - centerX, y - centerY);
         if (initialDist > 0) {
           const ratio = currentDist / initialDist;
-          z.imgData.scale = Math.max(0.05, initialScale * ratio);
+          // 解除過小的限制，允許使用者自由縮小
+          z.imgData.scale = Math.max(0.01, initialScale * ratio);
         }
       } else if (activeMode === 'rotate') {
         const centerX = z.x + z.w/2 + z.imgData.offsetX;
@@ -815,7 +816,6 @@
       tempCanvas.width = EXPORT_SIZE;
       tempCanvas.height = EXPORT_SIZE;
 
-      // 保持背景乾淨全白
       tempCtx.fillStyle = '#FFFFFF';
       tempCtx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
 
@@ -828,7 +828,6 @@
         const drawW = z.w * scaleRatio;
         const drawH = z.h * scaleRatio;
 
-        // 裁剪區域為上傳的格子範圍
         tempCtx.beginPath();
         tempCtx.rect(drawX, drawY, drawW, drawH);
         tempCtx.clip();
@@ -856,7 +855,7 @@
         // 加上非常細的四方形裁切線
         tempCtx.save();
         tempCtx.strokeStyle = '#999999';
-        tempCtx.lineWidth = 1; // 非常細的線
+        tempCtx.lineWidth = 1;
         tempCtx.beginPath();
         tempCtx.rect(drawX, drawY, drawW, drawH);
         tempCtx.stroke();
@@ -927,7 +926,6 @@
         }
         tempCtx.restore();
 
-        // 輸出時加上非常細的四方形裁切線
         tempCtx.save();
         tempCtx.strokeStyle = '#999999';
         tempCtx.lineWidth = 1;
