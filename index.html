@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY排版 (10.5x10.5mm 格子精確版)</title>
+  <title>鍵帽DIY排版 (12.5x12.5mm 智慧裁切PNG版)</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -106,7 +106,6 @@
       border: 2px solid #D4C3B3;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       border-radius: 12px;
-      /* 將左右 padding 縮小，讓兩側留白變窄 */
       padding: 20px 15px; 
       margin-bottom: 15px;
       box-sizing: border-box;
@@ -304,7 +303,7 @@
     <div class="step-section">
       <div class="step-title">第二步：保存圖片 (可長按儲存到相簿)</div>
       <div class="controls">
-        <button class="btn btn-checkout" onclick="openPreviewModal()">🎁 點擊預覽與保存高畫質排版</button>
+        <button class="btn btn-checkout" onclick="openPreviewModal()">🎁 點擊預覽與保存高畫質 PNG</button>
       </div>
     </div>
 
@@ -319,7 +318,7 @@
     <div class="tip-box">
       <b>✂ 操作說明：</b> 
       <ul>
-        <li>格子大小：10.5×10.5mm，格子間距：4mm，右側保留 9mm 邊距。</li>
+        <li>格子大小：12.5×12.5mm，匯出高畫質 PNG（有照片處裁切並保留邊框，空白處留白）。</li>
         <li>點擊下方任一鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
         <li>The創🌳台中市北區一中街173號。</li>
       </ul>
@@ -337,7 +336,7 @@
       </div>
 
       <div class="modal-btn-row">
-        <button class="btn-modal-upload" onclick="confirmAndDownload()">下載 2160×2160 高畫質圖</button>
+        <button class="btn-modal-upload" onclick="confirmAndDownload()">下載 2160×2160 高畫質 PNG</button>
         <button class="btn-modal-close" onclick="closePreviewModal()">關閉視窗</button>
       </div>
     </div>
@@ -363,12 +362,15 @@
     let baseZones = [];
 
     (function initZones() {
-      const leftMargin = 8.5 * mmToPx;  
-      const topMargin = 8.5 * mmToPx;   
-      const keycapSize = 10.5 * mmToPx; 
-      const gap = 4 * mmToPx;           
       const cols = 5;
       const rows = 5;
+      const keycapSize = 12.5 * mmToPx; // 12.5mm × 12.5mm
+      const totalGridW = cols * keycapSize; 
+      const totalGridH = rows * keycapSize; 
+
+      const leftMargin = (DESIGN_WIDTH - totalGridW) / 6;  
+      const topMargin = (DESIGN_HEIGHT - totalGridH) / 6;
+      const gap = leftMargin; 
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -802,10 +804,55 @@
       exportCanvas.height = 2160;
       const expCtx = exportCanvas.getContext('2d');
 
+      // 背景預設白色留白
       expCtx.fillStyle = '#FFFFFF';
       expCtx.fillRect(0, 0, 2160, 2160);
 
-      expCtx.drawImage(canvas, 0, 0, 2160, 2160);
+      const scaleFactor = 2160 / DESIGN_WIDTH;
+
+      // 智慧匯出：僅對「有上傳照片」的格子繪製圖片與裁切框，沒照片的格子保持空白留白
+      baseZones.forEach(z => {
+        if (z.img && z.imgData) {
+          const exportX = z.x * scaleFactor;
+          const exportTop = z.top * scaleFactor;
+          const exportW = z.w * scaleFactor;
+          const exportH = z.h * scaleFactor;
+
+          expCtx.save();
+          expCtx.beginPath();
+          expCtx.rect(exportX, exportTop, exportW, exportH);
+          expCtx.clip();
+
+          // 填入背景白色
+          expCtx.fillStyle = z.bgColor;
+          expCtx.fillRect(exportX, exportTop, exportW, exportH);
+
+          // 繪製高畫質圖片
+          expCtx.save();
+          expCtx.imageSmoothingEnabled = true;
+          expCtx.imageSmoothingQuality = 'high';
+
+          const centerX = exportX + exportW/2 + (z.imgData.offsetX * scaleFactor);
+          const centerY = exportTop + exportH/2 + (z.imgData.offsetY * scaleFactor);
+
+          expCtx.translate(centerX, centerY);
+          expCtx.rotate((z.imgData.angle || 0) * Math.PI / 180);
+          expCtx.scale((z.imgData.scale || 1) * scaleFactor, (z.imgData.scale || 1) * scaleFactor);
+
+          expCtx.drawImage(z.img, -z.img.width/2, -z.img.height/2);
+          expCtx.restore();
+          expCtx.restore();
+
+          // 繪製裁切框
+          expCtx.save();
+          expCtx.strokeStyle = '#D4C3B3';
+          expCtx.lineWidth = 1.2 * scaleFactor;
+          expCtx.beginPath();
+          expCtx.rect(exportX, exportTop, exportW, exportH);
+          expCtx.stroke();
+          expCtx.restore();
+        }
+      });
 
       const dataUrl = exportCanvas.toDataURL('image/png');
       document.getElementById('modalPreviewImg').src = dataUrl;
@@ -825,7 +872,7 @@
     function confirmAndDownload() {
       const dataUrl = document.getElementById('modalPreviewImg').src;
       const link = document.createElement('a');
-      link.download = 'keycap_layout_10.5mm_86x86.png';
+      link.download = 'keycap_layout_12.5mm_86x86.png';
       link.href = dataUrl;
       link.click();
     }
