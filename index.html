@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY排版</title>
+  <title>鍵帽DIY排版 (Make 二進位正確上傳版)</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -119,7 +119,7 @@
     }
 
     .step-sub-desc {
-      font-size: 15px; /* 稍微調整大小以適應手機單行顯示 */
+      font-size: 15px;
       font-weight: bold;
       color: #8B4513;
       text-align: center;
@@ -131,9 +131,7 @@
       border-radius: 8px;
       width: 100%;
       box-sizing: border-box;
-      white-space: nowrap; /* 強制不自動換行 */
-      overflow: hidden;    /* 防止超出溢出 */
-      text-overflow: ellipsis; /* 超出顯示省略號(保險用) */
+      white-space: normal;
     }
 
     .canvas-wrapper { 
@@ -187,6 +185,7 @@
       border-color: #cca677; 
     } 
     .btn-form:hover { background: #cea877; }
+    .btn-form:disabled { background: #d3c0a5; cursor: not-allowed; }
 
     .btn-checkout { background: #9E7B66; color: #ffffff; border-color: #8b6a55; } 
     .btn-checkout:hover { background: #8b6a55; }
@@ -269,40 +268,38 @@
         <canvas id="diyCanvas"></canvas>
       </div>
       <div class="controls">
-        <button class="btn btn-checkout" onclick="goToStep2()">下一步：預覽與儲存圖片 ➔</button>
+        <button class="btn btn-checkout" onclick="goToStep2()">下一步：預覽與確認 ➔</button>
       </div>
     </div>
 
-    <!-- 畫面 2 -->
+    <!-- 畫面 2：預覽與一鍵上傳 Make -->
     <div class="step-panel" id="panelStep2">
-      <div class="step-sub-desc" style="font-size: 15px; white-space: normal;" id="step2Desc">
-        手機版可以直接<b>長按下方圖片</b>選擇「加入相簿」或「儲存影像」，或者點擊按鈕下載：
+      <div class="step-sub-desc">
+        ✨ 請確認您的排版，點擊下方按鈕即可自動上傳至雲端！
       </div>
 
-      <div class="direct-preview-container" id="previewContainer">
+      <div class="direct-preview-container">
         <img id="directPreviewImg" src="" alt="排版預覽圖">
       </div>
 
       <div class="controls" style="margin-bottom: 15px;">
-        <button class="btn btn-checkout" id="downloadBtn" onclick="confirmAndDownload()">📥 下載透明底高畫質 PNG</button>
+        <button class="btn btn-form" id="uploadBtn" onclick="uploadToMake()" style="font-size: 17px; padding: 16px;">🚀 確認無誤，一鍵上傳至雲端</button>
       </div>
 
       <div class="controls">
         <button class="btn btn-secondary" onclick="switchStep(1)">⬅ 返回修改圖片</button>
-        <button class="btn btn-form" onclick="goToStep3()">下一步：前往提交表單 ➔</button>
       </div>
     </div>
 
-    <!-- 畫面 3 -->
+    <!-- 畫面 3：完成頁面 -->
     <div class="step-panel" id="panelStep3">
       <div class="controls" style="margin-bottom: 20px; flex-direction: column; align-items: center;">
-        <div class="step-sub-desc" style="margin-bottom: 15px; white-space: normal;">
-          ✨ 圖片已下載完成！請點擊下方按鈕前往 Google 表單上傳您的檔案：
+        <div class="step-sub-desc" style="margin-bottom: 15px; background: #e6f7ff; border-color: #91d5ff; color: #0050b3;">
+          🎉 圖片已成功上傳至 The創 雲端！您可以將畫面出示給店員確認。
         </div>
-        <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form" style="max-width: 350px; font-size: 17px; padding: 16px;">✨ 前往填寫 GOOGLE 表單</a>
       </div>
       <div class="controls">
-        <button class="btn btn-secondary" onclick="switchStep(2)">⬅ 返回上一步</button>
+        <button class="btn btn-secondary" onclick="location.reload()">🔄 重新製作新排版</button>
       </div>
     </div>
 
@@ -317,6 +314,8 @@
   <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
   <script>
+    const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/rhhgnq69969hs6td8gu8jmn4nywe77b1';
+
     const DESIGN_WIDTH_MM = 86;
     const DESIGN_HEIGHT_MM = 86;
     
@@ -332,7 +331,7 @@
 
     let selectedZoneIndex = -1;
     let baseZones = [];
-    let hasDownloaded = false;
+    let currentBlobForUpload = null;
 
     function switchStep(stepNum) {
       document.getElementById('panelStep1').classList.remove('active');
@@ -355,22 +354,41 @@
         alert('請至少上傳一張照片再前往下一步喔！');
         return;
       }
-      hasDownloaded = false;
       generateDirectPreview();
       switchStep(2);
     }
 
-    function goToStep3() {
-      if (!hasDownloaded) {
-        alert('❗ 請先點擊「下載透明底高畫質 PNG」按鈕，或長按圖片儲存到手機相簿後，才能前往下一步提交表單喔！');
-        const dlBtn = document.getElementById('downloadBtn');
-        dlBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        dlBtn.style.animation = 'none';
-        dlBtn.offsetHeight;
-        dlBtn.style.animation = 'pulse 0.5s ease 3';
+    async function uploadToMake() {
+      if (!currentBlobForUpload) {
+        alert('找不到圖片資料，請返回重新整理。');
         return;
       }
-      switchStep(3);
+
+      const btn = document.getElementById('uploadBtn');
+      btn.disabled = true;
+      btn.innerText = '⏳ 正在上傳至雲端，請稍候...';
+
+      // 改用 FormData 以正確的檔案二進位格式傳送
+      const formData = new FormData();
+      formData.append('image', currentBlobForUpload, `keycap_${Date.now()}.png`);
+
+      try {
+        const response = await fetch(MAKE_WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          switchStep(3);
+        } else {
+          throw new Error('伺服器回應異常');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('❗ 上傳失敗，請檢查網路連線或稍後再試一次！');
+        btn.disabled = false;
+        btn.innerText = '🚀 確認無誤，一鍵上傳至雲端';
+      }
     }
 
     (function initZones() {
@@ -860,23 +878,12 @@
         }
       });
 
+      // 將畫布轉為標準的 PNG Blob 檔案格式
       exportCanvas.toBlob(function(blob) {
+        currentBlobForUpload = blob;
         const dataUrl = URL.createObjectURL(blob);
         document.getElementById('directPreviewImg').src = dataUrl;
       }, 'image/png');
-    }
-
-    function confirmAndDownload() {
-      const imgElem = document.getElementById('directPreviewImg');
-      if (!imgElem.src) return;
-      hasDownloaded = true;
-      
-      const link = document.createElement('a');
-      link.download = 'keycap_layout_transparent.png';
-      link.href = imgElem.src;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     }
 
     initCanvasSize();
