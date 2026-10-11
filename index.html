@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY排版 (12.5x12.5mm 智慧裁切PNG版)</title>
+  <title>鍵帽DIY排版 (簡潔說明版)</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -99,7 +99,8 @@
 
     h2 { margin: 0; font-size: 22px; color: #4a3b32; }
 
-    .step-section {
+    .step-panel {
+      display: none;
       width: 100%;
       max-width: 820px;
       background: #FFFFFF;
@@ -109,21 +110,27 @@
       padding: 20px 15px; 
       margin-bottom: 15px;
       box-sizing: border-box;
-      display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .step-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #5c4033;
-      margin-bottom: 15px;
+    .step-panel.active {
       display: flex;
-      align-items: center;
-      justify-content: center;
+    }
+
+    .step-sub-desc {
+      font-size: 17px;
+      font-weight: bold;
+      color: #8B4513;
       text-align: center;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      background: #fff8ee;
+      border: 2px dashed #e0c2a0;
+      padding: 12px 15px;
+      border-radius: 8px;
       width: 100%;
+      box-sizing: border-box;
     }
 
     .canvas-wrapper { 
@@ -131,7 +138,7 @@
       height: 750px; 
       display: flex; 
       justify-content: center; 
-      margin-bottom: 5px;
+      margin-bottom: 15px;
       overflow: hidden; 
       position: relative;
       background: #FFFFFF; 
@@ -155,13 +162,13 @@
     }
 
     .btn { 
-      padding: 12px 18px; 
+      padding: 14px 20px; 
       border-radius: 6px; 
       cursor: pointer; 
-      font-size: 15px; 
+      font-size: 16px; 
       font-weight: bold; 
       flex: 1; 
-      min-width: 200px; 
+      min-width: 180px; 
       text-align: center; 
       border: 1px solid #D4C3B3;
       text-decoration: none;
@@ -179,6 +186,10 @@
     .btn-form:hover { background: #cea877; }
 
     .btn-checkout { background: #9E7B66; color: #ffffff; border-color: #8b6a55; } 
+    .btn-checkout:hover { background: #8b6a55; }
+
+    .btn-secondary { background: #f2dec0; color: #5c4033; border-color: #d4c3b3; }
+    .btn-secondary:hover { background: #e5ccaa; }
 
     .tip-box { 
       background: #fffbe6; 
@@ -193,82 +204,35 @@
     }
     .tip-box ul { margin: 5px 0 0 18px; padding: 0; }
 
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: #ffffff;
-      padding: 22px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 440px;
-      text-align: center;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      max-height: 90vh;
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
-    .modal-content h3 { margin-top: 0; color: #4a3b32; font-size: 20px; }
-    .modal-content p { font-size: 13px; color: #555; line-height: 1.4; margin-bottom: 12px; }
-
-    .preview-img-container {
+    .direct-preview-container {
       width: 100%;
-      height: 280px;
-      border: 1px solid #D4C3B3;
-      border-radius: 6px;
+      max-width: 420px;
+      height: 420px;
+      border: 2px solid #D4C3B3;
+      border-radius: 8px;
       margin-bottom: 15px;
-      background: #f9f9f9;
+      background-image: linear-gradient(45deg, #e5e5e5 25%, transparent 25%), 
+                        linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #e5e5e5 75%), 
+                        linear-gradient(-45deg, transparent 75%, #e5e5e5 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      background-color: #ffffff;
     }
-    .preview-img-container img {
+    .direct-preview-container img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
       display: block;
     }
 
-    .modal-btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 5px;
-    }
-    .btn-modal-upload { 
-      background: #9E7B66; 
-      color: white; 
-      padding: 12px 15px; 
-      border: none; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-weight: bold; 
-      flex: 1; 
-      font-size: 14px;
-    }
-    .btn-modal-upload:hover { background: #8b6a55; }
-
-    .btn-modal-close { 
-      background: #dfcca6; 
-      color: #5c4033; 
-      padding: 12px 15px; 
-      border: none; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-weight: bold; 
-      flex: 1; 
-      font-size: 14px;
-    }
-    .btn-modal-close:hover { background: #d2bc94; }
-
     @media (max-width: 850px) {
       .canvas-wrapper { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+      .direct-preview-container { width: 100%; height: auto; aspect-ratio: 1 / 1; }
     }
   </style>
 </head>
@@ -291,54 +255,58 @@
       </div>
     </div>
 
-    <!-- 第一步：上傳圖片 -->
-    <div class="step-section">
-      <div class="step-title">第一步：上傳圖片 (請點擊格子上傳)</div>
+    <!-- 畫面 1 -->
+    <div class="step-panel active" id="panelStep1">
+      <div class="step-sub-desc">
+        🖼️ 幫圖片調整到自己想要的大小 & 位置<br>
+        ✨ 放大縮小 ~ 請拉圖片的四個角
+      </div>
       <div class="canvas-wrapper" id="canvasWrapper">
         <canvas id="diyCanvas"></canvas>
       </div>
-    </div>
-
-    <!-- 第二步：保存圖片 -->
-    <div class="step-section">
-      <div class="step-title">第二步：保存圖片 (可長按儲存到相簿)</div>
       <div class="controls">
-        <button class="btn btn-checkout" onclick="openPreviewModal()">🎁 點擊預覽與保存高畫質 PNG</button>
+        <button class="btn btn-checkout" onclick="goToStep2()">下一步：預覽與儲存圖片 ➔</button>
       </div>
     </div>
 
-    <!-- 第三步：提交圖片 -->
-    <div class="step-section">
-      <div class="step-title">第三步：提交圖片 (需登入 GOOGLE 表單)</div>
+    <!-- 畫面 2 -->
+    <div class="step-panel" id="panelStep2">
+      <div class="step-sub-desc" style="font-size: 16px;">
+        手機版可以直接<b>長按下方圖片</b>選擇「加入相簿」或「儲存影像」，或者點擊按鈕下載：
+      </div>
+
+      <div class="direct-preview-container">
+        <img id="directPreviewImg" src="" alt="排版預覽圖">
+      </div>
+
+      <div class="controls" style="margin-bottom: 15px;">
+        <button class="btn btn-checkout" onclick="confirmAndDownload()">📥 下載透明底高畫質 PNG</button>
+      </div>
+
       <div class="controls">
-        <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form">✨ 前往填寫表單上傳圖片</a>
+        <button class="btn btn-secondary" onclick="switchStep(1)">⬅ 返回修改圖片</button>
+        <button class="btn btn-form" onclick="goToStep3()">下一步：前往提交表單 ➔</button>
       </div>
     </div>
 
-    <div class="tip-box">
+    <!-- 畫面 3 -->
+    <div class="step-panel" id="panelStep3">
+      <div class="controls" style="margin-bottom: 20px; flex-direction: column; align-items: center;">
+        <div class="step-sub-desc" style="margin-bottom: 15px;">
+          ✨ 圖片已下載完成！請點擊下方按鈕前往 Google 表單上傳您的檔案：
+        </div>
+        <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form" style="max-width: 350px; font-size: 17px; padding: 16px;">✨ 前往填寫 GOOGLE 表單</a>
+      </div>
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="switchStep(2)">⬅ 返回上一步</button>
+      </div>
+    </div>
+
+    <div class="tip-box" style="margin-top: 15px;">
       <b>✂ 操作說明：</b> 
       <ul>
-        <li>格子大小：12.5×12.5mm，匯出高畫質 PNG（有照片處裁切並保留邊框，空白處留白）。</li>
-        <li>點擊下方任一鍵帽格子可上傳照片，上傳後可自由拖曳、縮放或旋轉圖片。</li>
         <li>The創🌳台中市北區一中街173號。</li>
       </ul>
-    </div>
-  </div>
-
-  <!-- 完成預覽視窗 -->
-  <div class="modal-overlay" id="previewModal" onclick="checkOutsideClose(event, 'previewModal')">
-    <div class="modal-content">
-      <h3>🎉 您的排版完成！</h3>
-      <p>手機版可以直接<b>長按圖片</b>選擇「加入相簿」或「儲存影像」，或者點擊下方按鈕下載：</p>
-
-      <div class="preview-img-container">
-        <img id="modalPreviewImg" src="" alt="排版預覽圖">
-      </div>
-
-      <div class="modal-btn-row">
-        <button class="btn-modal-upload" onclick="confirmAndDownload()">下載 2160×2160 高畫質 PNG</button>
-        <button class="btn-modal-close" onclick="closePreviewModal()">關閉視窗</button>
-      </div>
     </div>
   </div>
 
@@ -349,8 +317,8 @@
     const DESIGN_HEIGHT_MM = 86;
     
     const mmToPx = 10;
-    const DESIGN_WIDTH = DESIGN_WIDTH_MM * mmToPx;   // 860 px
-    const DESIGN_HEIGHT = DESIGN_HEIGHT_MM * mmToPx; // 860 px
+    const DESIGN_WIDTH = DESIGN_WIDTH_MM * mmToPx;   
+    const DESIGN_HEIGHT = DESIGN_HEIGHT_MM * mmToPx; 
 
     const canvas = document.getElementById('diyCanvas');
     const wrapper = document.getElementById('canvasWrapper');
@@ -361,10 +329,39 @@
     let selectedZoneIndex = -1;
     let baseZones = [];
 
+    function switchStep(stepNum) {
+      document.getElementById('panelStep1').classList.remove('active');
+      document.getElementById('panelStep2').classList.remove('active');
+      document.getElementById('panelStep3').classList.remove('active');
+
+      if (stepNum === 1) {
+        document.getElementById('panelStep1').classList.add('active');
+      } else if (stepNum === 2) {
+        document.getElementById('panelStep2').classList.add('active');
+      } else if (stepNum === 3) {
+        document.getElementById('panelStep3').classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToStep2() {
+      const uploadedCount = baseZones.filter(z => z.img !== null).length;
+      if (uploadedCount === 0) {
+        alert('請至少上傳一張照片再前往下一步喔！');
+        return;
+      }
+      generateDirectPreview();
+      switchStep(2);
+    }
+
+    function goToStep3() {
+      switchStep(3);
+    }
+
     (function initZones() {
       const cols = 5;
       const rows = 5;
-      const keycapSize = 12.5 * mmToPx; // 12.5mm × 12.5mm
+      const keycapSize = 12.5 * mmToPx; 
       const totalGridW = cols * keycapSize; 
       const totalGridH = rows * keycapSize; 
 
@@ -795,7 +792,7 @@
       }
     }
 
-    function openPreviewModal() {
+    function generateDirectPreview() {
       selectedZoneIndex = -1;
       render();
 
@@ -804,13 +801,10 @@
       exportCanvas.height = 2160;
       const expCtx = exportCanvas.getContext('2d');
 
-      // 背景預設白色留白
-      expCtx.fillStyle = '#FFFFFF';
-      expCtx.fillRect(0, 0, 2160, 2160);
+      expCtx.clearRect(0, 0, 2160, 2160);
 
       const scaleFactor = 2160 / DESIGN_WIDTH;
 
-      // 智慧匯出：僅對「有上傳照片」的格子繪製圖片與裁切框，沒照片的格子保持空白留白
       baseZones.forEach(z => {
         if (z.img && z.imgData) {
           const exportX = z.x * scaleFactor;
@@ -823,11 +817,9 @@
           expCtx.rect(exportX, exportTop, exportW, exportH);
           expCtx.clip();
 
-          // 填入背景白色
           expCtx.fillStyle = z.bgColor;
           expCtx.fillRect(exportX, exportTop, exportW, exportH);
 
-          // 繪製高畫質圖片
           expCtx.save();
           expCtx.imageSmoothingEnabled = true;
           expCtx.imageSmoothingQuality = 'high';
@@ -843,7 +835,6 @@
           expCtx.restore();
           expCtx.restore();
 
-          // 繪製裁切框
           expCtx.save();
           expCtx.strokeStyle = '#D4C3B3';
           expCtx.lineWidth = 1.2 * scaleFactor;
@@ -854,27 +845,21 @@
         }
       });
 
-      const dataUrl = exportCanvas.toDataURL('image/png');
-      document.getElementById('modalPreviewImg').src = dataUrl;
-      document.getElementById('previewModal').style.display = 'flex';
-    }
-
-    function closePreviewModal() {
-      document.getElementById('previewModal').style.display = 'none';
-    }
-
-    function checkOutsideClose(e, modalId) {
-      if (e.target.id === modalId) {
-        closePreviewModal();
-      }
+      exportCanvas.toBlob(function(blob) {
+        const dataUrl = URL.createObjectURL(blob);
+        document.getElementById('directPreviewImg').src = dataUrl;
+      }, 'image/png');
     }
 
     function confirmAndDownload() {
-      const dataUrl = document.getElementById('modalPreviewImg').src;
+      const imgElem = document.getElementById('directPreviewImg');
+      if (!imgElem.src) return;
       const link = document.createElement('a');
-      link.download = 'keycap_layout_12.5mm_86x86.png';
-      link.href = dataUrl;
+      link.download = 'keycap_layout_transparent.png';
+      link.href = imgElem.src;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
 
     initCanvasSize();
