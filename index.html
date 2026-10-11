@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鍵帽DIY排版 (防呆提醒版)</title>
+  <title>鍵帽DIY排版 (不換行優化版)</title>
   <style>
     body { 
       font-family: sans-serif; 
@@ -119,7 +119,7 @@
     }
 
     .step-sub-desc {
-      font-size: 17px;
+      font-size: 15px; /* 稍微調整大小以適應手機單行顯示 */
       font-weight: bold;
       color: #8B4513;
       text-align: center;
@@ -131,6 +131,9 @@
       border-radius: 8px;
       width: 100%;
       box-sizing: border-box;
+      white-space: nowrap; /* 強制不自動換行 */
+      overflow: hidden;    /* 防止超出溢出 */
+      text-overflow: ellipsis; /* 超出顯示省略號(保險用) */
     }
 
     .canvas-wrapper { 
@@ -272,7 +275,7 @@
 
     <!-- 畫面 2 -->
     <div class="step-panel" id="panelStep2">
-      <div class="step-sub-desc" style="font-size: 16px;" id="step2Desc">
+      <div class="step-sub-desc" style="font-size: 15px; white-space: normal;" id="step2Desc">
         手機版可以直接<b>長按下方圖片</b>選擇「加入相簿」或「儲存影像」，或者點擊按鈕下載：
       </div>
 
@@ -293,7 +296,7 @@
     <!-- 畫面 3 -->
     <div class="step-panel" id="panelStep3">
       <div class="controls" style="margin-bottom: 20px; flex-direction: column; align-items: center;">
-        <div class="step-sub-desc" style="margin-bottom: 15px;">
+        <div class="step-sub-desc" style="margin-bottom: 15px; white-space: normal;">
           ✨ 圖片已下載完成！請點擊下方按鈕前往 Google 表單上傳您的檔案：
         </div>
         <a href="https://forms.gle/1bcfaixLEmddUhMk9" target="_blank" class="btn btn-form" style="max-width: 350px; font-size: 17px; padding: 16px;">✨ 前往填寫 GOOGLE 表單</a>
@@ -329,7 +332,7 @@
 
     let selectedZoneIndex = -1;
     let baseZones = [];
-    let hasDownloaded = false; // 追蹤是否有點擊下載或儲存
+    let hasDownloaded = false;
 
     function switchStep(stepNum) {
       document.getElementById('panelStep1').classList.remove('active');
@@ -352,19 +355,18 @@
         alert('請至少上傳一張照片再前往下一步喔！');
         return;
       }
-      hasDownloaded = false; // 每次進來重置狀態
+      hasDownloaded = false;
       generateDirectPreview();
       switchStep(2);
     }
 
     function goToStep3() {
-      // 防呆檢查：如果還沒點過下載儲存，跳出警告並提示
       if (!hasDownloaded) {
         alert('❗ 請先點擊「下載透明底高畫質 PNG」按鈕，或長按圖片儲存到手機相簿後，才能前往下一步提交表單喔！');
         const dlBtn = document.getElementById('downloadBtn');
         dlBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         dlBtn.style.animation = 'none';
-        dlBtn.offsetHeight; /* trigger reflow */
+        dlBtn.offsetHeight;
         dlBtn.style.animation = 'pulse 0.5s ease 3';
         return;
       }
@@ -867,7 +869,7 @@
     function confirmAndDownload() {
       const imgElem = document.getElementById('directPreviewImg');
       if (!imgElem.src) return;
-      hasDownloaded = true; // 標記已下載，解鎖下一步
+      hasDownloaded = true;
       
       const link = document.createElement('a');
       link.download = 'keycap_layout_transparent.png';
