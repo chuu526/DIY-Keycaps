@@ -263,6 +263,9 @@
         ❗點擊格子上傳照片❗<br>
         🖼️ 幫圖片調整到自己想要的大小 & 位置<br>
         ✨ 放大縮小 ~ 請拉圖片的四個角
+        <div style="font-size: 13px; font-weight: normal; color: #a06b43; margin-top: 6px;">
+          (💡 支援雙指捏合放大縮小、旋轉，或單指拖曳調整位置)
+        </div>
       </div>
       <div class="canvas-wrapper" id="canvasWrapper">
         <canvas id="diyCanvas"></canvas>
@@ -368,7 +371,6 @@
       btn.disabled = true;
       btn.innerText = '⏳ 正在上傳至雲端，請稍候...';
 
-      // 改用 FormData 以正確的檔案二進位格式傳送
       const formData = new FormData();
       formData.append('image', currentBlobForUpload, `keycap_${Date.now()}.png`);
 
@@ -639,11 +641,15 @@
     let activeMode = null;
     let startX = 0, startY = 0;
     let initialDist = 0, initialScale = 1;
+    let initialPinchDist = 0;
+    let initialPinchAngle = 0;
+    let baseScaleBeforePinch = 1;
+    let baseAngleBeforePinch = 0;
 
-    function getCanvasPos(e) {
+    function getCanvasPos(e, touchIndex = 0) {
       const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.touches ? e.touches[touchIndex].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[touchIndex].clientY : e.clientY;
       const rawX = (clientX - rect.left) * (DESIGN_WIDTH / rect.width);
       const rawY = (clientY - rect.top) * (DESIGN_HEIGHT / rect.height);
       return { x: rawX, y: rawY };
@@ -663,10 +669,21 @@
     canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
 
     function handleCanvasInteraction(e) {
-      if (e.touches && e.touches.length >= 2) {
-        selectedZoneIndex = -1;
-        activeMode = null;
-        render();
+      if (e.touches && e.touches.length === 2) {
+        if (selectedZoneIndex !== -1) {
+          const z = baseZones[selectedZoneIndex];
+          if (z.img && z.imgData) {
+            saveState();
+            activeMode = 'pinch';
+            const p1 = getCanvasPos(e, 0);
+            const p2 = getCanvasPos(e, 1);
+            initialPinchDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            initialPinchAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+            baseScaleBeforePinch = z.imgData.scale;
+            baseAngleBeforePinch = z.imgData.angle;
+          }
+        }
+        if (e.cancelable) e.preventDefault();
         return;
       }
 
@@ -753,13 +770,49 @@
     window.addEventListener('touchmove', handlePointerMove, { passive: false });
 
     function handlePointerMove(e) {
-      if (e.touches && e.touches.length >= 2) return;
       if (!activeMode || selectedZoneIndex === -1) return;
-      
       if (e.cancelable) e.preventDefault();
 
-      const { x, y } = getCanvasPos(e);
       const z = baseZones[selectedZoneIndex];
+
+      if (e.touches && e.touches.length === 2 && activeMode === 'pinch') {
+        const p1 = getCanvasPos(e, 0);
+        const p2 = getCanvasPos(e, 1);
+        const currentDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const currentAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+
+        if (initialPinchDist > 0) {
+          const ratio = currentDist / initialPinchDist;
+          z.imgData.scale = Math.max(0.01, baseScaleBeforePinch * ratio);
+        }
+
+        let angleDiff = currentAngle - initialPinchAngle;
+        let rawAngle = baseAngleBeforePinch + angleDiff;
+
+        const snapTargets = [0, 90, 180, 270, 360, -90, -180, -270];
+        const snapThreshold = 5;
+        let normalizedAngle = ((rawAngle % 360) + 360) % 360;
+        let snapped = false;
+        for (let target of snapTargets) {
+          let normTarget = ((target % 360) + 360) % 360;
+          let diff = Math.abs(normalizedAngle - normTarget);
+          if (diff <= snapThreshold || diff >= 360 - snapThreshold) {
+            z.imgData.angle = target;
+            snapped = true;
+            break;
+          }
+        }
+        if (!snapped) {
+          z.imgData.angle = rawAngle;
+        }
+
+        render();
+        return;
+      }
+
+      if (e.touches && e.touches.length > 1) return;
+
+      const { x, y } = getCanvasPos(e);
       const dx = x - startX;
       const dy = y - startY;
 
@@ -878,7 +931,6 @@
         }
       });
 
-      // 將畫布轉為標準的 PNG Blob 檔案格式
       exportCanvas.toBlob(function(blob) {
         currentBlobForUpload = blob;
         const dataUrl = URL.createObjectURL(blob);
