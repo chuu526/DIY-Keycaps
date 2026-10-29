@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>鍵帽DIY排版 (Make 二進位正確上傳版)</title>
   <style>
     body { 
@@ -14,7 +14,7 @@
       background: #FFFAF0; 
       margin: 0; 
       box-sizing: border-box;
-      touch-action: manipulation; 
+      /* 允許預設的手勢操作，不再強制鎖死 */
     }
 
     .main-container {
@@ -152,6 +152,8 @@
       cursor: pointer; 
       width: 100% !important;
       height: 100% !important;
+      /* 未選中照片時，允許預設觸控行為（如縮放網頁） */
+      touch-action: auto; 
     }
 
     .controls { 
@@ -669,19 +671,23 @@
     canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
 
     function handleCanvasInteraction(e) {
-      if (e.touches && e.touches.length === 2) {
-        if (selectedZoneIndex !== -1) {
-          const z = baseZones[selectedZoneIndex];
-          if (z.img && z.imgData) {
-            saveState();
-            activeMode = 'pinch';
-            const p1 = getCanvasPos(e, 0);
-            const p2 = getCanvasPos(e, 1);
-            initialPinchDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-            initialPinchAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
-            baseScaleBeforePinch = z.imgData.scale;
-            baseAngleBeforePinch = z.imgData.angle;
-          }
+      // 如果沒有選中照片，且是雙指觸控，則不攔截事件，讓瀏覽器自由縮放網頁畫面
+      if (selectedZoneIndex === -1 && e.touches && e.touches.length >= 2) {
+        return; 
+      }
+
+      // 如果已選中照片，且偵測到雙指，則進行照片的捏合縮放與旋轉
+      if (selectedZoneIndex !== -1 && e.touches && e.touches.length === 2) {
+        const z = baseZones[selectedZoneIndex];
+        if (z.img && z.imgData) {
+          saveState();
+          activeMode = 'pinch';
+          const p1 = getCanvasPos(e, 0);
+          const p2 = getCanvasPos(e, 1);
+          initialPinchDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+          initialPinchAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+          baseScaleBeforePinch = z.imgData.scale;
+          baseAngleBeforePinch = z.imgData.angle;
         }
         if (e.cancelable) e.preventDefault();
         return;
@@ -770,6 +776,7 @@
     window.addEventListener('touchmove', handlePointerMove, { passive: false });
 
     function handlePointerMove(e) {
+      if (selectedZoneIndex === -1 && e.touches && e.touches.length >= 2) return;
       if (!activeMode || selectedZoneIndex === -1) return;
       if (e.cancelable) e.preventDefault();
 
